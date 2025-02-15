@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     "api",
     "rest_framework",
     "corsheaders",
-    "django_filters",
     "rest_framework_simplejwt.token_blacklist"
 ]
 
@@ -54,7 +53,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "corsheaders.middleware.CorsMiddleware",
-    "django.middleware.common.CommonMiddleware","
+    "django.middleware.common.CommonMiddleware",
 ]
 
 ROOT_URLCONF = "backend.urls"
@@ -136,8 +135,7 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
-    ],
-    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+    ]
 }
 
 SIMPLE_JWT = {
@@ -167,4 +165,6 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
 }
 
-CORS_ALLOWED_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = True
+
+AUTH_USER_MODEL = 'api.User'
