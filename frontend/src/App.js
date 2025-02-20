@@ -1,12 +1,15 @@
-import logo from './logo.svg';
 import './App.css';
-import react from "react"
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import Home from "./components/Home";
+import Crypto from "./components/Crypto";
+import News from "./components/News";
+import Stock from "./components/Stock";
+import Tax from "./components/Tax";
 import NotFound from "./components/NotFound"; 
 import ProtectedRoute from "./components/ProtectedRoute";
+import Navbar from "./components/Navbar";
 import { Navigate } from 'react-router-dom';
 
 function Logout() {
@@ -17,6 +20,16 @@ function Logout() {
 function RegisterAndLogout() {
   localStorage.clear()
   return <Register />
+}
+
+// Layout component to wrap protected routes with Navbar
+function ProtectedLayout({ children }) {
+  return (
+    <>
+      <Navbar />
+      {children}
+    </>
+  );
 }
 
 function App() {
@@ -33,7 +46,49 @@ function App() {
           path="/"
           element={
             <ProtectedRoute>
-              <Home />
+              <ProtectedLayout>
+                <Home />
+              </ProtectedLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/crypto"
+          element={
+            <ProtectedRoute>
+              <ProtectedLayout>
+                <Crypto />
+              </ProtectedLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/news"
+          element={
+            <ProtectedRoute>
+              <ProtectedLayout>
+                <News />
+              </ProtectedLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/stock"
+          element={
+            <ProtectedRoute>
+              <ProtectedLayout>
+                <Stock />
+              </ProtectedLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tax"
+          element={
+            <ProtectedRoute>
+              <ProtectedLayout>
+                <Tax />
+              </ProtectedLayout>
             </ProtectedRoute>
           }
         />
@@ -42,7 +97,7 @@ function App() {
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
-  )
+  );
 }
 
 export default App;
