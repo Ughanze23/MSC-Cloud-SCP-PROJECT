@@ -1,25 +1,28 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import {MaterialReactTable} from 'material-react-table';
+import { MaterialReactTable } from 'material-react-table';
 import api from '../api';
+import { useStock } from './StockContext';
 
 const StockSummaryTable = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { refreshTrigger } = useStock();
 
-  // Fetch data from the summary endpoint using your axios instance
   useEffect(() => {
-    api.get('/api/transactions/summary/')
-      .then((response) => {
+    const fetchData = async () => {
+      try {
+        const response = await api.get('/api/transactions/summary/');
         setData(response.data);
         setLoading(false);
-      })
-      .catch((error) => {
+      } catch (error) {
         console.error('Error fetching stock summary:', error);
         setLoading(false);
-      });
-  }, []);
+      }
+    };
 
-  // Define table columns that match your StockSummarySerializer fields
+    fetchData();
+  }, [refreshTrigger]);
+
   const columns = useMemo(
     () => [
       {

@@ -12,8 +12,10 @@ import {
   Alert
 } from '@mui/material';
 import api from "../api";
+import { useStock } from './StockContext';
 
 const StockForm = () => {
+  const { refreshData } = useStock();
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     ticker: '',
@@ -47,7 +49,6 @@ const StockForm = () => {
   };
 
   const handleTickerChange = (e) => {
-    // Convert to uppercase immediately during input
     const upperCaseTicker = e.target.value.toUpperCase();
     setFormData({ 
       ...formData, 
@@ -59,11 +60,13 @@ const StockForm = () => {
     e.preventDefault();
     try {
       await api.post("/api/transactions/", {
-        ticker: formData.ticker.toUpperCase(), // Ensure uppercase even during submission
+        ticker: formData.ticker.toUpperCase(),
         units: parseInt(formData.units),
         price_per_unit: parseFloat(formData.price_per_unit),
         transaction_type: formData.transaction_type
       });
+
+      refreshData(); // Trigger refresh in other components
 
       setSnackbar({
         open: true,
@@ -106,7 +109,7 @@ const StockForm = () => {
                 value={formData.ticker}
                 onChange={handleTickerChange}
                 inputProps={{ 
-                  style: { textTransform: 'uppercase' }  // Visual feedback - shows as uppercase
+                  style: { textTransform: 'uppercase' } 
                 }}
                 required
               />
