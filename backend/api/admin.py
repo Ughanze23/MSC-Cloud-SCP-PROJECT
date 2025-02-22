@@ -3,3 +3,4 @@ from api.models import *
 
 # Register your models here.
 admin.site.register(StockTransaction)
+admin.site.register(CryptoTransaction)
