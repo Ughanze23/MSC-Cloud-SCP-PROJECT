@@ -1,22 +1,17 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { MaterialReactTable } from 'material-react-table';
-import {
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Box,
-  Snackbar,
-  Alert
-} from '@mui/material';
+import { Typography, Button, Box, Paper, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Snackbar, Alert } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import api from '../api';
-import { useCrypto } from './CryptoContext';
+import { CryptoProvider, useCrypto } from './CryptoContext';
 
-const CryptoTransactionList = () => {
-  const [data, setData] = useState([]);
+const CryptoSpecificTransactionsContent = () => {
+  const { ticker } = useParams();
+  const navigate = useNavigate();
+  const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [editModal, setEditModal] = useState({ open: false, transaction: null });
   const [deleteModal, setDeleteModal] = useState({ open: false, transaction: null });
   const [snackbar, setSnackbar] = useState({
@@ -24,28 +19,32 @@ const CryptoTransactionList = () => {
     message: '',
     severity: 'success'
   });
-
-  const { refreshTrigger, refreshData } = useCrypto();
   
+  // Get context if available, or use a fallback
+  const cryptoContext = useCrypto();
+  const refreshData = cryptoContext?.refreshData || (() => {
+    console.log('Context not available, using local refresh only');
+  });
+
   const fetchTransactions = async () => {
     try {
-      const response = await api.get('/api/crypto/all/');
-      setData(response.data);
+      const response = await api.get(`/api/transactions/crypto/${ticker}/`);
+      setTransactions(response.data);
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching crypto transactions:', error);
+      console.error(`Error fetching transactions for ${ticker}:`, error);
+      setError('Failed to load transactions. Please try again later.');
       setLoading(false);
-      setSnackbar({
-        open: true,
-        message: 'Error fetching crypto transactions',
-        severity: 'error'
-      });
     }
   };
 
   useEffect(() => {
     fetchTransactions();
-  }, [refreshTrigger]); // Re-fetch when refreshTrigger changes
+  }, [ticker]);
+
+  const handleBack = () => {
+    navigate('/crypto');
+  };
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
@@ -57,7 +56,11 @@ const CryptoTransactionList = () => {
         transaction_type: editModal.transaction.transaction_type
       });
       
-      refreshData(); // Trigger refresh for all components
+      // Try to refresh global context if available
+      refreshData();
+      
+      // Refresh local data
+      fetchTransactions();
       
       setSnackbar({
         open: true,
@@ -79,7 +82,11 @@ const CryptoTransactionList = () => {
     try {
       await api.delete(`/api/transactions/crypto/${deleteModal.transaction.id}/`);
       
-      refreshData(); // Trigger refresh for all components
+      // Try to refresh global context if available
+      refreshData();
+      
+      // Refresh local data
+      fetchTransactions();
       
       setSnackbar({
         open: true,
@@ -101,16 +108,12 @@ const CryptoTransactionList = () => {
     () => [
       {
         accessorKey: 'transaction_date',
-        header: 'Transaction Date',
+        header: 'Date',
+        Cell: ({ cell }) => new Date(cell.getValue()).toLocaleDateString(),
       },
       {
-        accessorKey: 'id',
-        header: 'ID',
-        hidden: true
-      },
-      {
-        accessorKey: 'ticker',
-        header: 'Ticker',
+        accessorKey: 'transaction_type',
+        header: 'Type',
       },
       {
         accessorKey: 'units',
@@ -118,13 +121,14 @@ const CryptoTransactionList = () => {
       },
       {
         accessorKey: 'price_per_unit',
-        header: 'Price per Unit',
+        header: 'Price',
+        Cell: ({ cell }) => `$${parseFloat(cell.getValue()).toFixed(2)}`,
       },
       {
-        accessorKey: 'transaction_type',
-        header: 'Transaction Type',
+        accessorKey: 'id',
+        header: 'Transaction ID',
+        hidden: true
       },
-      
       {
         header: 'Actions',
         Cell: ({ row }) => (
@@ -152,18 +156,77 @@ const CryptoTransactionList = () => {
     []
   );
 
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '50vh',
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Button
+          startIcon={<ArrowBackIcon />}
+          onClick={handleBack}
+          sx={{ mb: 3 }}
+        >
+          Back to Portfolio
+        </Button>
+        <Paper sx={{ p: 3, textAlign: 'center' }}>
+          <Typography color="error">{error}</Typography>
+        </Paper>
+      </Box>
+    );
+  }
+
   return (
-    <div style={{ marginTop: '20px' }}>
-      <MaterialReactTable 
-        columns={columns} 
-        data={data} 
-        state={{ isLoading: loading ,
-          columnVisibility: {
-            id: false, 
-          },}}
-        enableSorting
-        enableColumnFilters
-      />
+    <Box sx={{ p: 3 }}>
+      <Button
+        startIcon={<ArrowBackIcon />}
+        onClick={handleBack}
+        sx={{ mb: 3 }}
+      >
+        Back to Portfolio
+      </Button>
+
+      <Typography variant="h4" component="h1" sx={{ mb: 3 }}>
+        {ticker} Transactions
+      </Typography>
+
+      {transactions.length === 0 ? (
+        <Paper sx={{ p: 3 }}>
+          <Typography>No transactions found for {ticker}.</Typography>
+        </Paper>
+      ) : (
+        <Paper sx={{ p: 2 }}>
+          <MaterialReactTable
+            columns={columns}
+            data={transactions}
+            enableSorting
+            enableColumnFilters
+            initialState={{
+              sorting: [
+                {
+                  id: 'transaction_date',
+                  desc: true,
+                },
+              ],
+              columnVisibility: {
+                id: false,
+              },
+            }}
+          />
+        </Paper>
+      )}
 
       {/* Edit Modal */}
       <Dialog open={editModal.open} onClose={() => setEditModal({ open: false, transaction: null })}>
@@ -227,8 +290,17 @@ const CryptoTransactionList = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </div>
+    </Box>
   );
 };
 
-export default CryptoTransactionList;
+// Wrapper component that ensures the content is wrapped with CryptoProvider
+const CryptoSpecificTransactions = () => {
+  return (
+    <CryptoProvider>
+      <CryptoSpecificTransactionsContent />
+    </CryptoProvider>
+  );
+};
+
+export default CryptoSpecificTransactions;

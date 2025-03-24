@@ -59,7 +59,7 @@ const CryptoForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post("/api/crypto/transactions/", {
+      await api.post("/api/transactions/crypto", {
         ticker: formData.ticker.toUpperCase(),
         units: parseInt(formData.units),
         price_per_unit: parseFloat(formData.price_per_unit),

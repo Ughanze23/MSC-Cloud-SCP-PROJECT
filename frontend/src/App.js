@@ -11,6 +11,8 @@ import NotFound from "./components/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Navbar from "./components/Navbar";
 import { Navigate } from 'react-router-dom';
+import StockSpecificTransactions from './components/StockSpecificTransactions';
+import CryptoSpecificTransactions from './components/CryptoSpecificTransactions';
 
 function Logout() {
   localStorage.clear()
@@ -62,6 +64,17 @@ function App() {
             </ProtectedRoute>
           }
         />
+        {/* New route for specific crypto transactions */}
+        <Route
+          path="/crypto/:ticker"
+          element={
+            <ProtectedRoute>
+              <ProtectedLayout>
+                <CryptoSpecificTransactions />
+              </ProtectedLayout>
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/news"
           element={
@@ -78,6 +91,17 @@ function App() {
             <ProtectedRoute>
               <ProtectedLayout>
                 <Stock />
+              </ProtectedLayout>
+            </ProtectedRoute>
+          }
+        />
+        {/* Route for specific stock transactions */}
+        <Route
+          path="/stock/:ticker"
+          element={
+            <ProtectedRoute>
+              <ProtectedLayout>
+                <StockSpecificTransactions />
               </ProtectedLayout>
             </ProtectedRoute>
           }
