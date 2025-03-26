@@ -1,0 +1,79 @@
+name: Deploy web app
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  CI:
+        runs-on: ubuntu-latest
+        steps:
+        - name: Fetch code
+          uses: actions/checkout@v3
+
+        - name: Setup Node.js
+          uses: actions/setup-node@v3
+          with:
+            node-version: '18'
+
+        - name: Install frontend dependencies
+          working-directory: ./frontend
+          run: npm install --legacy-peer-deps
+
+        - name: Build frontend
+          working-directory: ./frontend
+          run: |
+            CI=false npm run build
+
+        - name: Set up Python
+          uses: actions/setup-python@v4
+          with:
+            python-version: '3.12.4'
+
+        - name: Install backend dependencies
+          working-directory: ./backend
+          run: |
+           python -m pip install --upgrade pip
+           pip install -r requirements.txt
+  Build-and-Deploy:
+    needs: CI  
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch code
+        uses: actions/checkout@v3
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to Dockerhub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      - name: Build and push Docker image
+        run: |
+          docker build \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/portafolio-backend:latest .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/portafolio-backend:latest
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.AWS_EC2_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.AWS_EC2_IP }} >> ~/.ssh/known_hosts
+
+      - name: Deploy on AWS EC2 
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@${{ secrets.AWS_EC2_IP }} << 'EOF'
+            docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" -p "${{ secrets.DOCKERHUB_TOKEN }}"
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/portafolio-backend:latest
+            docker stop portafolio-backend || true
+            docker rm portafolio-backend || true
+            docker run -d \
+              --name portafolio-backend -p 80:8080 ${{ secrets.DOCKERHUB_USERNAME }}/portafolio-backend:latest
+          EOF

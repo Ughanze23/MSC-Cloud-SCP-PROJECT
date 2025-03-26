@@ -65,7 +65,7 @@ ROOT_URLCONF = "backend.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [os.path.join(BASE_DIR, 'templates')],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -88,9 +88,9 @@ DATABASES = {
    "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "postgres", 
-        "USER": os.environ.get('DB_USER'), 
-        "PASSWORD": os.environ.get('DB_PASSWORD'), 
-        "HOST": os.environ.get('DB_HOST'),  
+        "USER": os.environ.get('DB_USER','postgres'), 
+        "PASSWORD": os.environ.get('DB_PASSWORD','K$K$rot2024'), 
+        "HOST": os.environ.get('DB_HOST','database-1.c9qu888ce1s6.us-east-1.rds.amazonaws.com'),  
         "PORT": 5432 
     }
 }
@@ -131,6 +131,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR,"staticfiles")
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -177,3 +179,7 @@ SIMPLE_JWT = {
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWS_CREDENTIAL = True
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://ec2-3-92-199-26.compute-1.amazonaws.com"
+]

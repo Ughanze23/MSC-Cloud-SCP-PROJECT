@@ -1,7 +1,10 @@
 from api.views import CreateUserView
 from django.contrib import admin
-from django.urls import path,include
+from django.urls import path,include,re_path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from django.conf import settings  
+from django.conf.urls.static import static
+from .views import index 
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -10,4 +13,12 @@ urlpatterns = [
     path("api/register/", CreateUserView.as_view(), name="register"),
     path("api-auth/", include("rest_framework.urls")), 
     path("api/", include("api.urls")),
+]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+#if url cant be found display index.html page.
+urlpatterns += [
+    re_path(r'^(?!admin|api).*$', index, name='index')  
 ]
