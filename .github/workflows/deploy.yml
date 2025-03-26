@@ -21,7 +21,9 @@ jobs:
 
         - name: Install frontend dependencies
           working-directory: ./frontend
-          run: npm install --legacy-peer-deps
+          run: |
+            npm install --legacy-peer-deps
+            npm install @mui/x-date-pickers @emotion/react @emotion/styled
 
         - name: Build frontend
           working-directory: ./frontend
