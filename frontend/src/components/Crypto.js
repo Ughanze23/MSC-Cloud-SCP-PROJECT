@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import CryptoForm from '../components/CryptoForm';
 import CryptoSummaryTable from '../components/CryptoSummaryTable';
 import CryptoTransactionList from '../components/CryptoTransactionList';
+import CryptoPieChart from '../components/CryptoPieChart';
 import { Button, Typography, Box, Paper } from '@mui/material';
 import { CryptoProvider } from './CryptoContext';
 
@@ -66,11 +67,9 @@ function Crypto() {
                 fontWeight: 500
               }}
             >
-              Additional Content
+              Portfolio Distribution
             </Typography>
-            <Typography>
-              This space can be used for other components or widgets.
-            </Typography>
+            <CryptoPieChart />
           </Paper>
         </Box>
 
