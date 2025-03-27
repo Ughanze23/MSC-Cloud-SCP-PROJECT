@@ -1,10 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import CryptoForm from '../components/CryptoForm';
 import CryptoSummaryTable from '../components/CryptoSummaryTable';
 import CryptoTransactionList from '../components/CryptoTransactionList';
-import CryptoPieChart from '../components/CryptoPieChart';
-import { Button, Typography, Box, Paper } from '@mui/material';
-import { CryptoProvider } from './CryptoContext';
+import { Button, Typography, Box, Paper, CircularProgress, Divider } from '@mui/material';
+import { CryptoProvider, useCrypto } from './CryptoContext';
+import api from '../api';
+
+// Inline Portfolio Value Component
+const InlineCryptoPortfolioValue = () => {
+  const [totalValue, setTotalValue] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const { refreshTrigger } = useCrypto();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get('/api/crypto/summary/');
+        const cryptoData = response.data;
+        
+        // Calculate total portfolio value
+        const value = cryptoData.reduce((sum, item) => 
+          sum + (parseFloat(item.total_units) * parseFloat(item.average_price)), 0);
+        
+        setTotalValue(value);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching portfolio value:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [refreshTrigger]); // Refresh when transactions change
+
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+      <Typography variant="body1" color="text.secondary" sx={{ mr: 1 }}>
+        Total Portfolio Value:
+      </Typography>
+      {loading ? (
+        <CircularProgress size={16} sx={{ ml: 1 }} />
+      ) : (
+        <Typography variant="h6" sx={{ fontWeight: 500, color: '#007bff' }}>
+          ${totalValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+        </Typography>
+      )}
+    </Box>
+  );
+};
 
 function Crypto() {
   const [showTransactions, setShowTransactions] = useState(false);
@@ -39,37 +83,21 @@ function Crypto() {
               variant="h5" 
               component="h2" 
               sx={{ 
-                mb: 3,
+                mb: 2,
                 fontWeight: 500
               }}
             >
               Crypto Summary
             </Typography>
+            
+            {/* Total Value displayed inline inside the card */}
+            <InlineCryptoPortfolioValue />
+            
+            <Divider sx={{ my: 2 }} />
+            
             <Box sx={{ width: '100%' }}>
               <CryptoSummaryTable />
             </Box>
-          </Paper>
-
-          <Paper 
-            sx={{ 
-              p: 3,
-              boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
-              borderRadius: '8px',
-              height: 'fit-content',
-              backgroundColor: '#fff'
-            }}
-          >
-            <Typography 
-              variant="h5" 
-              component="h2" 
-              sx={{ 
-                mb: 3,
-                fontWeight: 500
-              }}
-            >
-              Portfolio Distribution
-            </Typography>
-            <CryptoPieChart />
           </Paper>
         </Box>
 
