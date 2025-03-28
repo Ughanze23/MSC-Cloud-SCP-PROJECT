@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
 
 // Define available currencies with their symbols and default rates
 export const CURRENCIES = {
@@ -35,13 +34,16 @@ export const CurrencyProvider = ({ children }) => {
       setUsingDefaultRate(false);
 
       try {
-        const response = await axios.post(
-          'https://5ss3rebhtf.execute-api.us-east-1.amazonaws.com/currencyConverter',
-          { currency: selectedCurrency }
-        );
-
-        if (response.data && response.data.exchange_rate) {
-          setExchangeRate(response.data.exchange_rate);
+        const response = await fetch('https://5ss3rebhtf.execute-api.us-east-1.amazonaws.com/currencyConverter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ currency: selectedCurrency })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.exchange_rate) {
+          setExchangeRate(data.exchange_rate);
         } else {
           // Fallback to default rate if API doesn't return expected data
           console.warn('API missing exchange_rate, using default for', selectedCurrency);
