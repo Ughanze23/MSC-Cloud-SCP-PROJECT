@@ -9,7 +9,10 @@ import {
   Container,
   Button,
   MenuItem,
-  useTheme
+  useTheme,
+  Select,
+  FormControl,
+  CircularProgress
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useNavigate, Link } from 'react-router-dom';
@@ -19,11 +22,19 @@ import NewspaperIcon from '@mui/icons-material/Newspaper';
 import ShowChartIcon from '@mui/icons-material/ShowChart';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import LogoutIcon from '@mui/icons-material/Logout';
+import { useCurrency, CURRENCIES } from './CurrencyContext';
 
 const Navbar = () => {
   const [anchorElNav, setAnchorElNav] = useState(null);
   const navigate = useNavigate();
   const theme = useTheme();
+  
+  // Use currency context
+  const { 
+    selectedCurrency, 
+    setSelectedCurrency, 
+    loading: currencyLoading 
+  } = useCurrency();
 
   const pages = [
     { name: 'Home', path: '/', icon: <HomeIcon /> },
@@ -31,7 +42,6 @@ const Navbar = () => {
     { name: 'Stocks', path: '/stock', icon: <ShowChartIcon /> },
     { name: 'Tax', path: '/tax', icon: <ReceiptIcon /> },
     { name: 'News', path: '/news', icon: <NewspaperIcon /> },
-    
   ];
 
   const handleOpenNavMenu = (event) => {
@@ -49,6 +59,10 @@ const Navbar = () => {
 
   const handleLogout = () => {
     navigate('/logout');
+  };
+
+  const handleCurrencyChange = (event) => {
+    setSelectedCurrency(event.target.value);
   };
 
   return (
@@ -108,6 +122,32 @@ const Navbar = () => {
                   </Box>
                 </MenuItem>
               ))}
+              
+              {/* Currency selector in mobile menu */}
+              <MenuItem>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <FormControl size="small" sx={{ minWidth: 80 }}>
+                    <Select
+                      value={selectedCurrency}
+                      onChange={handleCurrencyChange}
+                      sx={{ 
+                        color: 'inherit',
+                        '& .MuiSelect-select': { py: 0.5, px: 1 }
+                      }}
+                      displayEmpty
+                      variant="outlined"
+                    >
+                      {Object.keys(CURRENCIES).map((curr) => (
+                        <MenuItem key={curr} value={curr}>
+                          {curr}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  {currencyLoading && <CircularProgress size={16} />}
+                </Box>
+              </MenuItem>
+              
               <MenuItem onClick={handleLogout}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <LogoutIcon />
@@ -145,6 +185,44 @@ const Navbar = () => {
                 {page.name}
               </Button>
             ))}
+          </Box>
+
+          {/* Currency selector for desktop */}
+          <Box sx={{ 
+            display: { xs: 'none', md: 'flex' }, 
+            alignItems: 'center',
+            mr: 2
+          }}>
+            <FormControl size="small">
+              <Select
+                value={selectedCurrency}
+                onChange={handleCurrencyChange}
+                sx={{ 
+                  color: 'white',
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'rgba(255, 255, 255, 0.5)',
+                  },
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'white',
+                  },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'white',
+                  },
+                  '& .MuiSvgIcon-root': {
+                    color: 'white',
+                  }
+                }}
+                displayEmpty
+                variant="outlined"
+              >
+                {Object.keys(CURRENCIES).map((curr) => (
+                  <MenuItem key={curr} value={curr}>
+                    {curr}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            {currencyLoading && <CircularProgress size={16} sx={{ ml: 1, color: 'white' }} />}
           </Box>
 
           {/* Logout button  */}

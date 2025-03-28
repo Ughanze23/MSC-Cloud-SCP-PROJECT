@@ -13,6 +13,7 @@ import Navbar from "./components/Navbar";
 import { Navigate } from 'react-router-dom';
 import StockSpecificTransactions from './components/StockSpecificTransactions';
 import CryptoSpecificTransactions from './components/CryptoSpecificTransactions';
+import { CurrencyProvider } from './components/CurrencyContext';
 
 function Logout() {
   localStorage.clear()
@@ -27,10 +28,10 @@ function RegisterAndLogout() {
 // Layout component to wrap protected routes with Navbar
 function ProtectedLayout({ children }) {
   return (
-    <>
+    <CurrencyProvider>
       <Navbar />
       {children}
-    </>
+    </CurrencyProvider>
   );
 }
 
@@ -64,7 +65,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-        {/* New route for specific crypto transactions */}
+        {/*route for specific crypto transactions */}
         <Route
           path="/crypto/:ticker"
           element={

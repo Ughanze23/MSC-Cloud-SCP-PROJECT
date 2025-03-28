@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MaterialReactTable } from 'material-react-table';
-import { Typography, Button, Box, Paper, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Snackbar, Alert } from '@mui/material';
+import { Typography, Button, Box, Paper, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Snackbar, Alert, Tooltip } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import InfoIcon from '@mui/icons-material/Info';
 import api from '../api';
 import { StockProvider, useStock } from './StockContext';
+import { useCurrency } from './CurrencyContext';
 
 const StockSpecificTransactionsContent = () => {
   const { ticker } = useParams();
@@ -25,6 +27,9 @@ const StockSpecificTransactionsContent = () => {
   const refreshData = stockContext?.refreshData || (() => {
     console.log('Stock context not available, using local refresh only');
   });
+
+  // Get currency formatting function and state
+  const { formatCurrency, selectedCurrency, usingDefaultRate } = useCurrency();
 
   const fetchTransactions = async () => {
     try {
@@ -121,8 +126,38 @@ const StockSpecificTransactionsContent = () => {
       },
       {
         accessorKey: 'price_per_unit',
-        header: 'Price',
-        Cell: ({ cell }) => `$${parseFloat(cell.getValue()).toFixed(2)}`,
+        header: `Price (${selectedCurrency})`,
+        Cell: ({ cell }) => {
+          const formattedPrice = formatCurrency(cell.getValue());
+          return (
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              {formattedPrice}
+              {usingDefaultRate && (
+                <Tooltip title="Using estimated exchange rate" arrow>
+                  <InfoIcon sx={{ ml: 0.5, fontSize: 14, color: 'orange' }} />
+                </Tooltip>
+              )}
+            </Box>
+          );
+        }
+      },
+      {
+        id: 'total_value',
+        header: `Total Value (${selectedCurrency})`,
+        accessorFn: (row) => parseFloat(row.units) * parseFloat(row.price_per_unit),
+        Cell: ({ cell }) => {
+          const totalValue = cell.getValue();
+          return (
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              {formatCurrency(totalValue)}
+              {usingDefaultRate && (
+                <Tooltip title="Using estimated exchange rate" arrow>
+                  <InfoIcon sx={{ ml: 0.5, fontSize: 14, color: 'orange' }} />
+                </Tooltip>
+              )}
+            </Box>
+          );
+        }
       },
       {
         accessorKey: 'id',
@@ -153,7 +188,7 @@ const StockSpecificTransactionsContent = () => {
         ),
       },
     ],
-    []
+    [formatCurrency, selectedCurrency, usingDefaultRate]
   );
 
   if (loading) {
@@ -245,7 +280,7 @@ const StockSpecificTransactionsContent = () => {
                 required
               />
               <TextField
-                label="Price per Unit"
+                label={`Price per Unit (EUR)`}
                 type="number"
                 value={editModal.transaction?.price_per_unit || ''}
                 onChange={(e) => setEditModal(prev => ({
@@ -253,6 +288,7 @@ const StockSpecificTransactionsContent = () => {
                   transaction: { ...prev.transaction, price_per_unit: e.target.value }
                 }))}
                 required
+                helperText="All transactions are stored in EUR"
               />
             </Box>
           </DialogContent>

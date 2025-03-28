@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import CryptoForm from '../components/CryptoForm';
 import CryptoSummaryTable from '../components/CryptoSummaryTable';
 import CryptoTransactionList from '../components/CryptoTransactionList';
-import { Button, Typography, Box, Paper, CircularProgress, Divider } from '@mui/material';
+import { Button, Typography, Box, Paper, CircularProgress, Divider, Tooltip } from '@mui/material';
 import { CryptoProvider, useCrypto } from './CryptoContext';
+import { useCurrency } from './CurrencyContext';
+import InfoIcon from '@mui/icons-material/Info';
 import api from '../api';
 
 // Inline Portfolio Value Component
@@ -11,6 +13,9 @@ const InlineCryptoPortfolioValue = () => {
   const [totalValue, setTotalValue] = useState(0);
   const [loading, setLoading] = useState(true);
   const { refreshTrigger } = useCrypto();
+  
+  // Use currency context for formatting
+  const { formatCurrency, selectedCurrency, loading: currencyLoading, usingDefaultRate } = useCurrency();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,14 +42,22 @@ const InlineCryptoPortfolioValue = () => {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
       <Typography variant="body1" color="text.secondary" sx={{ mr: 1 }}>
-        Total Portfolio Value:
+        Total Portfolio Value ({selectedCurrency}):
       </Typography>
-      {loading ? (
+      {loading || currencyLoading ? (
         <CircularProgress size={16} sx={{ ml: 1 }} />
       ) : (
-        <Typography variant="h6" sx={{ fontWeight: 500, color: '#007bff' }}>
-          ${totalValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Typography variant="h6" sx={{ fontWeight: 500, color: '#007bff' }}>
+            {formatCurrency(totalValue)}
+          </Typography>
+          
+          {usingDefaultRate && (
+            <Tooltip title="Using estimated exchange rate. Current market rates may vary." arrow>
+              <InfoIcon sx={{ ml: 1, fontSize: 16, color: 'orange' }} />
+            </Tooltip>
+          )}
+        </Box>
       )}
     </Box>
   );

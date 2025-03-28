@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Paper, Grid, Button, Divider } from '@mui/material';
+import { Box, Typography, Paper, Grid, Button, Divider, CircularProgress } from '@mui/material';
 import { Link } from 'react-router-dom';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import ShowChartIcon from '@mui/icons-material/ShowChart';
-import api from '../api'; 
+import api from '../api';
+import { useCurrency } from './CurrencyContext';
 
 function Home() {
   const [stats, setStats] = useState({
@@ -14,12 +15,16 @@ function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  // Fetch stats 
+  // Get currency conversion functions
+  const { formatCurrency, selectedCurrency, loading: currencyLoading } = useCurrency();
+  
+  // Fetch stats when component mounts
   useEffect(() => {
     const fetchStats = async () => {
       try {
         setLoading(true);
         
+        // Use the correct API endpoints based on your backend URLs
         const [cryptoResponse, stockResponse] = await Promise.all([
           api.get('/api/crypto/summary/'),
           api.get('/api/transactions/summary/')
@@ -28,7 +33,7 @@ function Home() {
         const cryptoData = cryptoResponse.data;
         const stockData = stockResponse.data;
         
-        // Calculate portfolio value 
+        // Calculate portfolio value from your data structure
         // For each item, multiply total_units by average_price
         const cryptoValue = cryptoData.reduce((sum, item) => 
           sum + (parseFloat(item.total_units) * parseFloat(item.average_price)), 0);
@@ -39,7 +44,7 @@ function Home() {
         setStats({
           totalCryptos: cryptoData.length,
           totalStocks: stockData.length,
-          portfolioValue: cryptoValue + stockValue 
+          portfolioValue: cryptoValue + stockValue // Store as number for better formatting
         });
         
         setLoading(false);
@@ -91,10 +96,16 @@ function Home() {
           <Grid item xs={12} md={4}>
             <Box sx={{ textAlign: 'center', p: 2 }}>
               <Typography variant="h6" color="text.secondary">
-                Total Portfolio Value
+                Total Portfolio Value ({selectedCurrency})
               </Typography>
               <Typography variant="h4" color="primary">
-                ${loading ? '...' : parseFloat(stats.portfolioValue).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                {loading ? (
+                  <CircularProgress size={24} sx={{ my: 1 }} />
+                ) : currencyLoading ? (
+                  <CircularProgress size={24} sx={{ my: 1 }} />
+                ) : (
+                  formatCurrency(stats.portfolioValue)
+                )}
               </Typography>
             </Box>
           </Grid>

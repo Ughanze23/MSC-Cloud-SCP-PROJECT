@@ -1,15 +1,20 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { MaterialReactTable } from 'material-react-table';
-import { Button, Box } from '@mui/material';
+import { Button, Box, Tooltip } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import InfoIcon from '@mui/icons-material/Info';
 import api from '../api';
 import { useCrypto } from './CryptoContext';
+import { useCurrency } from './CurrencyContext';
 
 const CryptoSummaryTable = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const { refreshTrigger } = useCrypto();
   const navigate = useNavigate();
+  
+  // Get currency formatting function and state
+  const { formatCurrency, selectedCurrency, usingDefaultRate } = useCurrency();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,7 +48,38 @@ const CryptoSummaryTable = () => {
       },
       {
         accessorKey: 'average_price',
-        header: 'Average Price',
+        header: `Average Price (${selectedCurrency})`,
+        Cell: ({ cell }) => {
+          const formattedPrice = formatCurrency(cell.getValue());
+          return (
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              {formattedPrice}
+              {usingDefaultRate && (
+                <Tooltip title="Using estimated exchange rate" arrow>
+                  <InfoIcon sx={{ ml: 0.5, fontSize: 14, color: 'orange' }} />
+                </Tooltip>
+              )}
+            </Box>
+          );
+        }
+      },
+      {
+        id: 'total_value',
+        header: `Total Value (${selectedCurrency})`,
+        accessorFn: (row) => parseFloat(row.total_units) * parseFloat(row.average_price),
+        Cell: ({ cell }) => {
+          const totalValue = cell.getValue();
+          return (
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              {formatCurrency(totalValue)}
+              {usingDefaultRate && (
+                <Tooltip title="Using estimated exchange rate" arrow>
+                  <InfoIcon sx={{ ml: 0.5, fontSize: 14, color: 'orange' }} />
+                </Tooltip>
+              )}
+            </Box>
+          );
+        }
       },
       {
         header: 'Actions',
@@ -61,7 +97,7 @@ const CryptoSummaryTable = () => {
         ),
       },
     ],
-    [handleViewTransactions]
+    [handleViewTransactions, formatCurrency, selectedCurrency, usingDefaultRate]
   );
 
   return (
@@ -72,6 +108,14 @@ const CryptoSummaryTable = () => {
         state={{ isLoading: loading }}
         enableSorting
         enableColumnFilters
+        initialState={{
+          sorting: [
+            {
+              id: 'total_value',
+              desc: true,
+            },
+          ],
+        }}
       />
     </div>
   );

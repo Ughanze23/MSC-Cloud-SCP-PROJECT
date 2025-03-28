@@ -9,10 +9,13 @@ import {
   TextField,
   Box,
   Snackbar,
-  Alert
+  Alert,
+  Tooltip
 } from '@mui/material';
+import InfoIcon from '@mui/icons-material/Info';
 import api from '../api';
 import { useStock } from './StockContext';
+import { useCurrency } from './CurrencyContext';
 
 const StockTransactionList = () => {
   const [data, setData] = useState([]);
@@ -26,6 +29,7 @@ const StockTransactionList = () => {
   });
 
   const { refreshTrigger, refreshData } = useStock();
+  const { formatCurrency, selectedCurrency, usingDefaultRate } = useCurrency();
   
   const fetchTransactions = async () => {
     try {
@@ -102,6 +106,7 @@ const StockTransactionList = () => {
       {
         accessorKey: 'transaction_date',
         header: 'Transaction Date',
+        Cell: ({ cell }) => new Date(cell.getValue()).toLocaleDateString()
       },
       {
         accessorKey: 'id',
@@ -118,13 +123,43 @@ const StockTransactionList = () => {
       },
       {
         accessorKey: 'price_per_unit',
-        header: 'Price per Unit',
+        header: `Price per Unit (${selectedCurrency})`,
+        Cell: ({ cell }) => {
+          const formattedPrice = formatCurrency(cell.getValue());
+          return (
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              {formattedPrice}
+              {usingDefaultRate && (
+                <Tooltip title="Using estimated exchange rate" arrow>
+                  <InfoIcon sx={{ ml: 0.5, fontSize: 14, color: 'orange' }} />
+                </Tooltip>
+              )}
+            </Box>
+          );
+        }
+      },
+      {
+        id: 'total_value',
+        header: `Total Value (${selectedCurrency})`,
+        accessorFn: (row) => row.units * row.price_per_unit,
+        Cell: ({ cell }) => {
+          const totalValue = cell.getValue();
+          return (
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              {formatCurrency(totalValue)}
+              {usingDefaultRate && (
+                <Tooltip title="Using estimated exchange rate" arrow>
+                  <InfoIcon sx={{ ml: 0.5, fontSize: 14, color: 'orange' }} />
+                </Tooltip>
+              )}
+            </Box>
+          );
+        }
       },
       {
         accessorKey: 'transaction_type',
         header: 'Transaction Type',
       },
-      
       {
         header: 'Actions',
         Cell: ({ row }) => (
@@ -149,7 +184,7 @@ const StockTransactionList = () => {
         ),
       },
     ],
-    []
+    [formatCurrency, selectedCurrency, usingDefaultRate] // Update when currency changes
   );
 
   return (
@@ -157,12 +192,22 @@ const StockTransactionList = () => {
       <MaterialReactTable 
         columns={columns} 
         data={data} 
-        state={{ isLoading: loading ,
+        state={{ 
+          isLoading: loading,
           columnVisibility: {
             id: false, 
-          },}}
+          },
+        }}
         enableSorting
         enableColumnFilters
+        initialState={{
+          sorting: [
+            {
+              id: 'transaction_date',
+              desc: true,
+            },
+          ],
+        }}
       />
 
       {/* Edit Modal */}
@@ -182,7 +227,7 @@ const StockTransactionList = () => {
                 required
               />
               <TextField
-                label="Price per Unit"
+                label={`Price per Unit (EUR)`}
                 type="number"
                 value={editModal.transaction?.price_per_unit || ''}
                 onChange={(e) => setEditModal(prev => ({
@@ -190,6 +235,7 @@ const StockTransactionList = () => {
                   transaction: { ...prev.transaction, price_per_unit: e.target.value }
                 }))}
                 required
+                helperText="All transactions are stored in EUR"
               />
             </Box>
           </DialogContent>
