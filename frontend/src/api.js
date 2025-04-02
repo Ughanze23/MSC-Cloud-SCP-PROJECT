@@ -1,8 +1,8 @@
 import axios from "axios";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "./constants";
 
-const apiUrl = "http://ec2-54-227-6-16.compute-1.amazonaws.com/" || "http://localhost:8000/";
-
+const apiUrl = "http://ec2-3-253-157-179.eu-west-1.compute.amazonaws.com/" ||  "http://localhost:8000/";
+//
 const api = axios.create({
   baseURL: apiUrl,
 });

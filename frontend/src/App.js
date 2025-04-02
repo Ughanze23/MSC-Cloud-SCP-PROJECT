@@ -25,7 +25,7 @@ function RegisterAndLogout() {
   return <Register />
 }
 
-// Layout component to wrap protected routes with Navbar
+//protected routes
 function ProtectedLayout({ children }) {
   return (
     <CurrencyProvider>

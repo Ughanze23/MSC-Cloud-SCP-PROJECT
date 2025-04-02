@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-// Define available currencies with their symbols and default rates
+
 export const CURRENCIES = {
   USD: { symbol: '$', name: 'USD', defaultRate: 0.92 },
   CNY: { symbol: '¥', name: 'CNY', defaultRate: 0.13 },
@@ -45,7 +45,7 @@ export const CurrencyProvider = ({ children }) => {
         if (response.ok && data.exchange_rate) {
           setExchangeRate(data.exchange_rate);
         } else {
-          // Fallback to default rate if API doesn't return expected data
+      
           console.warn('API missing exchange_rate, using default for', selectedCurrency);
           setExchangeRate(CURRENCIES[selectedCurrency].defaultRate);
           setUsingDefaultRate(true);
@@ -53,7 +53,7 @@ export const CurrencyProvider = ({ children }) => {
       } catch (err) {
         console.error('Error fetching exchange rate:', err);
         setError('Failed to fetch exchange rate');
-        // Fallback to default rate
+      
         console.warn('Using default exchange rate for', selectedCurrency);
         setExchangeRate(CURRENCIES[selectedCurrency].defaultRate);
         setUsingDefaultRate(true);

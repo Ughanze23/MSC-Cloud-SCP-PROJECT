@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 from .models import StockTransaction,CryptoTransaction
+from .models import PriceAlert
 
 #user serializer
 
@@ -46,3 +47,16 @@ class CryptoSummarySerializer(serializers.Serializer):
     ticker = serializers.CharField()
     total_units = serializers.DecimalField(max_digits=10, decimal_places=2)
     average_price = serializers.DecimalField(max_digits=10, decimal_places=2)
+
+
+##alert serializer
+class PriceAlertSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PriceAlert
+        fields = [
+            'id', 'asset_type', 'ticker', 'price_target', 'trigger_condition'
+        ]
+    
+    def create(self, validated_data):
+        validated_data['user'] = self.context['request'].user
+        return super().create(validated_data)

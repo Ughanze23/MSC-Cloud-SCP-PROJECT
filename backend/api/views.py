@@ -3,14 +3,27 @@ from rest_framework import generics,status
 from django.contrib.auth.models import User
 from api.serializer import UserSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from django.db.models import Sum, Avg
 from django.db.models.functions import Cast
 from decimal import Decimal
-from .models import StockTransaction,CryptoTransaction
-from .serializer import StockTransactionSerializer, StockSummarySerializer,CryptoSummarySerializer,CryptoTransactionSerializer
+from .models import StockTransaction,CryptoTransaction,PriceAlert
+from .serializer import StockTransactionSerializer, StockSummarySerializer,CryptoSummarySerializer,CryptoTransactionSerializer,PriceAlertSerializer
+
+from .alerts import check_price_alerts
+
+#custom login
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)  # Get the token response
+        check_price_alerts()  # Trigger the price alert check after login
+        return data
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
 
 #Create user view
 class CreateUserView(generics.CreateAPIView):
@@ -150,3 +163,20 @@ class CryptoSpecificTransactionsView(generics.ListAPIView):
             user=self.request.user,
             ticker=ticker
         )
+
+
+class PriceAlertListCreateView(generics.ListCreateAPIView):
+    serializer_class = PriceAlertSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """Only return alerts owned by the current user"""
+        return PriceAlert.objects.filter(user=self.request.user)
+
+class PriceAlertDetailView(generics.RetrieveDestroyAPIView):
+    serializer_class = PriceAlertSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """Only allow operations on alerts owned by the current user"""
+        return PriceAlert.objects.filter(user=self.request.user)
