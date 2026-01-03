@@ -39,7 +39,7 @@ WORKDIR /code/backend/
 
 
 
-# run django migration command
+# run Django migration command
 #RUN python manage.py migrate  
 
 RUN python manage.py collectstatic --no-input
