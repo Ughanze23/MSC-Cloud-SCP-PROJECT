@@ -1,266 +1,705 @@
-# Cloud Platform Project (CPP)
+# Scalable Portfolio Management Web Application
 
-> FMCG Order management cloud native web application leveraging AWS serverless architecture and event-driven design
+> Cloud-based investment tracking platform for stocks and cryptocurrencies with real-time price alerts, tax calculation, and multi-currency portfolio valuation
 
-[![GitHub](https://img.shields.io/badge/GitHub-Repository-blue)](https://github.com/Ughanze23/CPP-PROJECT)
-[![Project Report](https://img.shields.io/badge/Report-Google%20Drive-green)](https://drive.google.com/file/d/14_afWEFO1cCxO7o11jGpk5X13k4yfsXP/view?usp=drive_link)
-[![Python](https://img.shields.io/badge/Python-3.8+-blue)](https://www.python.org/)
-[![AWS](https://img.shields.io/badge/AWS-Serverless-orange)](https://aws.amazon.com/)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-blue)](https://github.com/Ughanze23/MSC-Cloud-SCP-PROJECT)
+[![Project Report](https://img.shields.io/badge/Report-Google%20Drive-green)](https://drive.google.com/file/d/1otEltqxjy81nIsm3MHuob09_DdSgd7VT/view?usp=drive_link)
+[![AWS](https://img.shields.io/badge/AWS-Deployed-orange)](https://aws.amazon.com/)
+[![React](https://img.shields.io/badge/React-Frontend-61dafb)](https://reactjs.org/)
+[![Django](https://img.shields.io/badge/Django-Backend-092e20)](https://www.djangoproject.com/)
 
 ## 📋 Table of Contents
 
 - [Overview](#overview)
-- [Architecture](#architecture)
+- [Problem Statement](#problem-statement)
+- [Solution Architecture](#solution-architecture)
 - [Features](#features)
-- [AWS Services Integration](#aws-services-integration)
+- [Design Patterns](#design-patterns)
 - [Technology Stack](#technology-stack)
+- [API Integrations](#api-integrations)
+- [Database Design](#database-design)
 - [Project Structure](#project-structure)
 - [Getting Started](#getting-started)
 - [Deployment](#deployment)
-- [API Documentation](#api-documentation)
-- [Event-Driven Workflow](#event-driven-workflow)
-- [Monitoring & Logging](#monitoring--logging)
+- [CI/CD Pipeline](#cicd-pipeline)
+- [Screenshots](#screenshots)
+- [Future Enhancements](#future-enhancements)
 - [Documentation](#documentation)
-- [Cost Optimization](#cost-optimization)
-- [Contributing](#contributing)
 
 ## 🎯 Overview
 
-The Cloud Platform Programming Project (CPP) is a sophisticated inventory optimization system built on AWS serverless architecture. This project demonstrates enterprise-level cloud engineering practices, focusing on scalability, cost-efficiency, and event-driven microservices architecture.
+**Course**: Scalable Cloud Programming  
+**Programme**: MSc in Cloud Computing  
+**Institution**: National College of Ireland  
+**Student**: Ikenna Ughanze Polycarp (23384069)  
+**Submission Date**: 02/04/2024
 
-The system intelligently manages inventory across multiple locations, processes real-time data streams, and provides actionable insights through automated optimization alerts. It showcases the power of AWS managed services in building resilient, scalable cloud applications.
+This project delivers a scalable cloud-based portfolio management application that enables users to track their stock and cryptocurrency investments in a unified platform. Built with modern microservices architecture and deployed on AWS, the application demonstrates enterprise-level cloud engineering practices including auto-scaling, high availability (>99% uptime), and seamless integration with multiple third-party services.
 
-### Key Objectives
+### Project Objectives
 
-- **Scalability**: Handle variable workloads with auto-scaling capabilities
-- **Cost Efficiency**: Leverage serverless computing to minimize infrastructure costs
-- **Real-time Processing**: Process inventory events in near real-time
-- **Reliability**: 99.9% uptime with fault-tolerant architecture
-- **Automation**: Fully automated deployment and operations
+The application addresses the complexity of managing investment portfolios across different asset classes by providing:
+- Centralized tracking of stocks and cryptocurrencies
+- Real-time price alerts via email notifications
+- Investment gains tax calculation using custom-built API
+- Multi-currency portfolio valuation
+- Near real-time financial news integration
+- Secure, scalable cloud infrastructure
 
-## 🏗️ Architecture
+## 🔍 Problem Statement
 
-The application implements a serverless, event-driven architecture using AWS services:
+Managing investment portfolios across different markets presents several challenges:
 
-### System Architecture
+### Current Pain Points
+
+1. **Data Silos**: Investment data scattered across multiple platforms
+2. **Manual Tracking**: Time-consuming manual consolidation of portfolio data
+3. **Lack of Real-Time Insights**: No immediate updates on price movements
+4. **Tax Complexity**: Difficulty calculating investment income tax
+5. **Multi-Currency Challenges**: Need to track portfolio value in different currencies
+6. **Inefficiency**: Reliance on multiple applications or Excel spreadsheets
+
+### Solution Impact
+
+Traditional investment tracking methods require investors to manually consolidate data from various platforms, leading to inefficiencies, errors, and a lack of real-time insights. This cloud-based solution eliminates these challenges by providing a unified, automated, and scalable platform.
+
+## 🏗️ Solution Architecture
+
+### Cloud Architecture
+
+The application implements a modern microservices architecture deployed on AWS infrastructure:
 
 ```
-┌──────────────┐      ┌──────────────┐      ┌──────────────┐
-│   Frontend   │─────▶│   Backend    │─────▶│     S3       │
-│  (React/JS)  │      │   (Python)   │      │   Storage    │
-└──────────────┘      └──────┬───────┘      └──────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                    GitHub Repository                         │
+│  ┌──────────┐  ┌──────────┐  ┌────────────────────┐        │
+│  │ React UI │  │  Django  │  │ GitHub Actions     │        │
+│  │          │  │   API    │  │ (CI/CD Workflows)  │        │
+│  └──────────┘  └──────────┘  └────────────────────┘        │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+                    ┌─────────────────┐
+                    │ GitHub Actions  │
+                    │  CI/CD Pipeline │
+                    │  • Lint Code    │
+                    │  • Build & Test │
+                    │  • Dockerize    │
+                    └────────┬────────┘
                              │
                              ▼
-                      ┌──────────────┐
-                      │     SNS      │
-                      │ Notification │
-                      └──────┬───────┘
-                             │
-                             ▼
-                      ┌──────────────┐      ┌──────────────┐
-                      │     SQS      │─────▶│   Lambda     │
-                      │    Queue     │      │  Functions   │
-                      └──────────────┘      └──────┬───────┘
-                                                   │
-                                                   ▼
-                                            ┌──────────────┐
-                                            │  Inventory   │
-                                            │  Optimizer   │
-                                            └──────────────┘
+┌────────────────────────────────────────────────────────────┐
+│                      AWS Cloud Infrastructure               │
+│                                                             │
+│  ┌──────────────┐         ┌──────────────┐                │
+│  │    EC2       │ ◄────── │   Docker     │                │
+│  │  Instance    │         │  Container   │                │
+│  │              │         │ (React+Django)│                │
+│  └──────┬───────┘         └──────────────┘                │
+│         │                                                   │
+│         ▼                                                   │
+│  ┌──────────────┐         ┌──────────────┐                │
+│  │     RDS      │         │ API Gateway  │                │
+│  │ PostgreSQL   │         │              │                │
+│  └──────────────┘         └──────┬───────┘                │
+│                                   │                         │
+│                                   ▼                         │
+│                          ┌──────────────┐                  │
+│                          │   Lambda     │                  │
+│                          │ (Tax Calc)   │                  │
+│                          └──────────────┘                  │
+└────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌────────────────────────────────────────────────────────────┐
+│              External APIs & Services                       │
+│                                                             │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐    │
+│  │Alpha Vantage │  │CoinMarketCap │  │   Custom     │    │
+│  │  Stock API   │  │  Crypto API  │  │ Classmate    │    │
+│  │              │  │              │  │    APIs      │    │
+│  └──────────────┘  └──────────────┘  └──────────────┘    │
+└────────────────────────────────────────────────────────────┘
 ```
-![alt text](image.png)
+<img width="2010" height="1012" alt="image" src="https://github.com/user-attachments/assets/a717d86a-c9fa-448a-8a2a-115d3631d164" />
 
-### Architecture Principles
 
-- **Microservices**: Loosely coupled, independently deployable services
-- **Event-Driven**: Asynchronous communication via SNS/SQS
-- **Serverless**: No server management, pay-per-use pricing
-- **Scalable**: Automatic scaling based on demand
-- **Resilient**: Built-in redundancy and fault tolerance
+
+### Architecture Components
+
+| Component | Technology | Purpose |
+|-----------|-----------|---------|
+| **Frontend** | React.js | User interface and API consumption |
+| **Backend** | Django | Business logic and data management |
+| **Database** | AWS RDS (PostgreSQL) | Persistent data storage |
+| **Compute** | AWS EC2 | Application hosting |
+| **Serverless** | AWS Lambda | Tax calculation service |
+| **API Gateway** | AWS API Gateway | RESTful API management |
+| **CI/CD** | GitHub Actions | Automated deployment pipeline |
+| **Containerization** | Docker | 
 
 ## ✨ Features
 
 ### Core Functionality
 
-#### Inventory Management
-- Real-time inventory tracking across multiple locations
-- Automated stock level monitoring and alerts
-- Predictive analytics for demand forecasting
-- Multi-warehouse coordination and optimization
-- Historical data analysis and reporting
+#### 1. User Management
+- **User Registration**: Secure account creation with validation
+- **Authentication**: Secure login with JWT tokens
+- **Session Management**: Persistent user sessions
 
-#### Optimization Engine
-- **Demand Forecasting**: Predict future inventory needs
-- **Automated Reordering**: Trigger purchase orders based on thresholds
-- **Stock Balancing**: Optimize distribution across locations
-- **Cost Minimization**: Reduce holding and ordering costs
-- **Performance Metrics**: Track KPIs and optimization success
+#### 2. Investment Tracking
+- **Stock Portfolio Management**
+  - Add, update, and delete stock investments
+  - Track number of units bought and sold
+  - View current stock prices via Alpha Vantage API
+  - Monitor Portfolio performance
 
-#### Event Processing
-- Real-time event ingestion via SQS
-- Asynchronous processing with Lambda functions
-- Event replay and dead-letter queue handling
-- Message deduplication and ordering
-- Scalable event processing pipeline
+- **Cryptocurrency Portfolio Management**
+  - Add, update, and delete cryptocurrency holdings
+  - Real-time crypto prices via CoinMarketCap API
+  - Track portfolio value across different cryptocurrencies
 
-### Advanced Features
+#### 3. Price Alert System
+- **Custom Price Alerts**
+  - Create alerts for stocks and cryptocurrencies
+  - Set target prices (above or below current price)
+  - Receive email notifications when targets are met
+  
+- **Email Notifications**
+  - Automated email alerts via custom API (x23122498)
+  - Triggered on user login to check alert conditions
+  - Clear notification of price movements
 
-- **Notification System**: Real-time alerts via SNS (email, SMS, webhooks)
-- **S3 Integration**: Secure storage for reports and data archives
-- **API Gateway**: RESTful API with authentication and rate limiting
-- **CloudWatch Integration**: Comprehensive monitoring and logging
-- **CI/CD Pipeline**: Automated testing and deployment via GitHub Actions
+#### 4. Tax Calculation
+- **Investment Income Tax Calculator**
+  - Custom-built API using AWS Lambda
+  - Calculate tax on investment income
+  - Support for multiple income types:
+    - Employment income
+    - Self-employment income
+    - Investment income
+  - Accessible via RESTful endpoint on API Gateway
 
-## 🔧 AWS Services Integration
+#### 5. Multi-Currency Support
+- **Portfolio Valuation**
+  - View portfolio value in different currencies
+  - Real-time currency conversion via classmate's API (x23158131)
+  - Support for major global currencies
 
-### Amazon S3 (Simple Storage Service)
-**Purpose**: Object storage for data, reports, and backups
+#### 6. Financial News Integration
+- **Real-Time Market News**
+  - Latest financial news via Alpha Vantage API
+  - Filter news by ticker symbol
+  - Stay informed on market developments
 
-**Implementation**:
-- **Bucket Structure**: Organized by environment and data type
-- **Lifecycle Policies**: Automatic archival to reduce costs
-- **Versioning**: Maintain historical data versions
-- **Encryption**: Server-side encryption (SSE-S3/KMS)
-- **Access Control**: IAM policies and bucket policies
+#### 7. Dashboard & Analytics
+- **Portfolio Overview Dashboard**
+  - Total portfolio value (EUR)
+  - Total unique stock holdings
+  - Total unique cryptocurrency holdings
+  - Quick summary metrics
 
-**Use Cases**:
-- Storing inventory reports (CSV, JSON, Excel)
-- Archiving transaction logs
-- Hosting static web content
-- Data lake for analytics
+### Non-Functional Features
 
-### Amazon SNS (Simple Notification Service)
-**Purpose**: Pub/Sub messaging for event notifications
+| Feature | Target | Implementation |
+|---------|--------|----------------|
+| **Uptime** | >99% availability | AWS auto-scaling, health checks |
+| **Data Integrity** | 100% accuracy | RDS ACID compliance, transaction management |
+| **Security** | Enterprise-grade | JWT authentication, HTTPS, input validation |
+| **Scalability** | Auto-scaling | EC2 auto-scaling groups, containerization |
+| **Usability** | Intuitive UI | Responsive React design, clear navigation |
 
-**Implementation**:
-- **Topics**: Separate topics for different event types
-- **Subscriptions**: Email, SMS, SQS, Lambda endpoints
-- **Message Filtering**: Route messages based on attributes
-- **Message Attributes**: Metadata for routing and processing
-- **Delivery Retries**: Automatic retry with exponential backoff
+## 🔧 Design Patterns
 
-**Use Cases**:
-- Inventory threshold alerts
-- Order confirmation notifications
-- System health alerts
-- Multi-channel communication
+The application implements several industry-standard design patterns to ensure modularity, scalability, and maintainability:
 
-### Amazon SQS (Simple Queue Service)
-**Purpose**: Message queuing for asynchronous processing
+<img width="1224" height="758" alt="image" src="https://github.com/user-attachments/assets/dbe17ee6-835b-4aa8-8080-00308fe7aa9a" />
 
-**Implementation**:
-- **Standard Queues**: At-least-once delivery
-- **FIFO Queues**: Exactly-once processing with ordering
-- **Dead Letter Queues**: Handle failed messages
-- **Visibility Timeout**: Prevent duplicate processing
-- **Long Polling**: Reduce costs and latency
+### 1. Microservices Architecture Pattern
 
-**Use Cases**:
-- Decoupling microservices
-- Buffering high-volume events
-- Load leveling for Lambda functions
-- Retry logic for failed operations
+**Implementation**: The application is divided into specialized, independently distributed services:
+- Tax Calculation Service (AWS Lambda)
+- Email Notification Service (Classmate's API)
+- Currency Converter Service (Classmate's API)
+- Main Application Service (React + Django)
 
-### AWS Lambda
-**Purpose**: Serverless compute for event-driven processing
+**Benefits**:
+- Independent scaling of services
+- Technology flexibility per service
+- Fault isolation
+- Easy deployment and updates
 
-**Implementation**:
-- **Multiple Functions**: Specialized functions for different tasks
-- **Event Sources**: Triggered by SQS, S3, API Gateway, CloudWatch
-- **Environment Variables**: Configuration management
-- **Layers**: Shared dependencies and utilities
-- **Error Handling**: Dead letter queues and CloudWatch alarms
+### 2. API Gateway Pattern
 
-**Functions**:
-- `inventory_processor`: Process inventory update events
-- `optimization_engine`: Run optimization algorithms
-- `report_generator`: Generate and store reports
-- `notification_handler`: Send notifications via SNS
+**Implementation**: Amazon API Gateway serves as the central entry point routing requests to appropriate microservices.
 
-### Additional AWS Services
+**Benefits**:
+- Simplified authentication and authorization
+- Request/response transformation
+- Rate limiting and throttling
+- Centralized API management
+- Simplified client consumption
 
-- **IAM**: Identity and access management
-- **CloudWatch**: Monitoring, logging, and alarms
-- **API Gateway**: RESTful API management
-- **Systems Manager**: Parameter store for secrets
-- **CloudFormation/Terraform**: Infrastructure as Code
+### 3. Backend for Frontend (BFF) Pattern
+
+**Implementation**: Frontend (React) and backend (Django) are containerized together in an ECS container. Django acts as the BFF by exposing RESTful APIs specifically designed to serve the React frontend efficiently.
+
+**Benefits**:
+- Optimized API responses for frontend needs
+- Independent scaling and versioning
+- Reduced frontend complexity
+- Better separation of concerns
+- Improved performance
+
+### 4. API Composition Pattern
+
+**Implementation**: The frontend aggregates data from multiple third-party APIs to present comprehensive information to users:
+- CoinMarketCap API (cryptocurrency prices)
+- Alpha Vantage API (stock prices and financial news)
+- Custom Tax Calculation API
+- Currency Converter API
+- Email Notification API
+
+**Considerations**:
+- Managed latency through async calls
+- Handled CORS restrictions
+- Implemented error handling for API failures
+
+### 5. Database Per Service Pattern
+
+**Implementation**: Each microservice has its own isolated data storage, ensuring loose coupling and independent scalability.
+
+**Benefits**:
+- Data independence
+- Technology flexibility
+- Easier scaling
+- Fault isolation
 
 ## 🛠️ Technology Stack
 
-### Frontend
-- **JavaScript/React**: Modern UI framework
-- **HTML5/CSS3**: Responsive web design
-- **Axios**: HTTP client for API calls
-- **Chart.js**: Data visualization
+### Frontend Technologies
 
-### Backend
-- **Python 3.8+**: Primary programming language
-- **Flask/FastAPI**: Web framework for REST API
-- **Boto3**: AWS SDK for Python
-- **Pandas**: Data analysis and manipulation
-- **NumPy**: Numerical computing
-- **SQLAlchemy**: Database ORM (if using RDS)
+#### React.js
+- **Version**: Latest stable
+- **Purpose**: Building responsive, interactive user interface
+- **Key Features**:
+  - Component-based architecture
+  - Virtual DOM for performance
+  - State management for real-time updates
+  - Hooks for efficient component logic
 
-### DevOps & Infrastructure
-- **Docker**: Containerization for local development
-- **GitHub Actions**: CI/CD automation
-- **AWS CDK/CloudFormation**: Infrastructure as Code
-- **Terraform**: Multi-cloud infrastructure management
-- **pytest**: Testing framework
+#### UI Components
+- **Forms**: Investment management, price alerts, user registration
+- **Tables**: Portfolio display, transaction history
+- **Charts**: Portfolio visualization
+- **Dashboards**: Summary metrics and KPIs
 
-### Data & Analytics
-- **JSON**: Data interchange format
-- **CSV**: Report generation
-- **Pandas**: Data processing
-- **Scikit-learn**: Machine learning (optional)
+### Backend Technologies
+
+#### Django
+- **Version**: 3.x+
+- **Purpose**: RESTful API development and business logic
+- **Key Features**:
+  - Django ORM for database operations
+  - Built-in authentication and authorization
+  - RESTful API framework
+  - Middleware for request/response processing
+  - Admin interface for data management
+
+#### Python
+- **Version**: 3.8+
+- **Purpose**: Application logic, API integrations
+- **Libraries**:
+  - `djangorestframework`: REST API development
+  - `psycopg2`: PostgreSQL adapter
+  - `requests`: HTTP library for API calls
+  - `python-dotenv`: Environment variable management
+
+### Database
+
+#### Amazon RDS (PostgreSQL)
+- **Database Engine**: PostgreSQL 12+
+- **Purpose**: Reliable, scalable relational database
+- **Features**:
+  - Managed database service
+  - Automatic backups
+  - Multi-AZ deployment for high availability
+  - Encryption at rest
+  - Automated software patching
+
+**Key Benefits of RDS**:
+- Reduces operational overhead
+- Provides reliable, scalable storage
+- Optimized for total cost of ownership
+- Built-in security and compliance
+
+### Cloud Infrastructure
+
+#### AWS Services
+
+**Compute**
+- **EC2**: Application hosting with auto-scaling capabilities
+- **Lambda**: Serverless tax calculation service
+
+**Database**
+- **RDS**: Managed PostgreSQL database
+
+**Networking**
+- **API Gateway**: RESTful API management and routing
+- **VPC**: Network isolation and security
+
+**DevOps**
+- **CloudWatch**: Monitoring and logging
+- **IAM**: Identity and access management
+
+### DevOps Tools
+
+#### Docker
+- **Purpose**: Application containerization
+- **Benefits**:
+  - Consistent environments (dev, staging, prod)
+  - Simplified deployment
+  - Resource efficiency
+  - Easy scaling
+
+#### GitHub Actions
+- **Purpose**: CI/CD automation
+- **Workflows**:
+  - Code linting
+  - Dependency installation
+  - Build and test
+  - Docker image creation
+  - Deployment to EC2
+
+## 🔌 API Integrations
+
+### Custom APIs (Author-Built)
+
+#### 1. Tax Calculation API
+
+**Description**: Calculate tax on different types of income including investment income.
+
+**Technology**: AWS Lambda + API Gateway
+
+**Endpoint**: `POST /tax/calculate`
+
+**Request Body**:
+```json
+{
+  "income_type": "investment",
+  "amount": 25000.00
+}
+```
+
+**Response**:
+```json
+{
+  "statusCode": 200,
+  "body": {
+    "tax_amount": 1250.00
+  }
+}
+```
+
+**Income Types Supported**:
+- Employment income
+- Self-employment income
+- Investment income
+
+**[View Full API Documentation](https://github.com/Ughanze23/tax-calculation-api)**
+
+### Classmate APIs
+
+#### 2. Currency Converter API (x23158131)
+
+**Description**: Convert portfolio value between different currencies.
+
+**Endpoint**: `GET /convert`
+
+**Parameters**:
+- `from`: Source currency code (e.g., EUR)
+- `to`: Target currency code (e.g., USD)
+- `amount`: Amount to convert
+
+**Example Request**:
+```
+GET /convert?from=EUR&to=USD&amount=1000
+```
+
+**Response**:
+```json
+{
+  "original_amount": 1000,
+  "original_currency": "EUR",
+  "converted_amount": 1089.50,
+  "target_currency": "USD"
+}
+```
+
+**[View API Documentation](https://github.com/classmate/currency-converter)**
+
+#### 3. Email Notification API (x23122498)
+
+**Description**: Send email notifications for price alerts.
+
+**Endpoint**: `POST /send-email`
+
+**Request Body**:
+```json
+{
+  "userId": "1",
+  "subject": "test",
+  "message": "test",
+  "email": "x23384069@student.ncirl.ie"
+}
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "data": {
+    "message": "Email sent successfully"
+  }
+}
+```
+
+**Authentication**: Bearer token required
+
+**[View API Documentation](https://github.com/classmate/email-api)**
+
+### Public APIs
+
+#### 4. Alpha Vantage API
+
+**Description**: Stock prices and financial news data.
+
+**Use Cases**:
+- Real-time stock price fetching
+- Historical price data
+- Financial news aggregation
+
+**Endpoints Used**:
+- `TIME_SERIES_INTRADAY`: Real-time stock prices
+- `NEWS_SENTIMENT`: Financial news and sentiment
+
+**Example Implementation**:
+```python
+import requests
+
+def get_stock_price(symbol):
+    url = f"https://www.alphavantage.co/query"
+    params = {
+        "function": "TIME_SERIES_INTRADAY",
+        "symbol": symbol,
+        "interval": "5min",
+        "apikey": API_KEY
+    }
+    response = requests.get(url, params=params)
+    return response.json()
+```
+
+**[Official Documentation](https://www.alphavantage.co/documentation/)**
+
+#### 5. CoinMarketCap API
+
+**Description**: Cryptocurrency prices and market data.
+
+**Use Cases**:
+- Real-time cryptocurrency prices
+- Market capitalization data
+- Historical price tracking
+
+**Endpoints Used**:
+- `/cryptocurrency/listings/latest`: Latest crypto prices
+- `/cryptocurrency/quotes/latest`: Specific crypto data
+
+**Example Implementation**:
+```python
+import requests
+
+def get_crypto_price(symbol):
+    url = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest"
+    headers = {
+        'X-CMC_PRO_API_KEY': API_KEY,
+    }
+    params = {
+        'symbol': symbol,
+        'convert': 'EUR'
+    }
+    response = requests.get(url, headers=headers, params=params)
+    return response.json()
+```
+
+**[Official Documentation](https://coinmarketcap.com/api/documentation/v1/)**
+
+### API Integration Architecture
+
+```
+┌──────────────────────────────────────────────────────────┐
+│              React Frontend                               │
+│  ┌────────────┐  ┌────────────┐  ┌────────────┐         │
+│  │ Investment │  │Price Alert │  │  Currency  │         │
+│  │  Manager   │  │  Component │  │  Converter │         │
+│  └─────┬──────┘  └─────┬──────┘  └─────┬──────┘         │
+└────────┼───────────────┼───────────────┼────────────────┘
+         │               │               │
+         ▼               ▼               ▼
+┌──────────────────────────────────────────────────────────┐
+│              Django Backend (BFF)                         │
+│  • Aggregates API calls                                   │
+│  • Handles authentication                                 │
+│  • Business logic layer                                   │
+└─────┬──────────┬──────────┬──────────┬────────────┬──────┘
+      │          │          │          │            │
+      ▼          ▼          ▼          ▼            ▼
+┌─────────┐ ┌─────────┐ ┌──────┐ ┌────────┐ ┌──────────┐
+│  Tax    │ │Currency │ │Email │ │ Alpha  │ │CoinMarket│
+│  API    │ │   API   │ │ API  │ │Vantage │ │   Cap    │
+│(Lambda) │ │(x23158) │ │(x231)│ │  API   │ │   API    │
+└─────────┘ └─────────┘ └──────┘ └────────┘ └──────────┘
+```
+
+## 💾 Database Design
+
+### Entity Relationship Diagram
+
+The application uses PostgreSQL on AWS RDS with the following core models:
+
+#### User Model
+```python
+class User(AbstractUser):
+    email = models.EmailField(unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+```
+
+#### Stock Transaction Model
+```python
+class StockTransaction(models.Model):
+    TRANSACTION_TYPES = [
+        ('BUY', 'Buy'),
+        ('SELL', 'Sell'),
+    ]
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    ticker = models.CharField(max_length=10)
+    units = models.DecimalField(max_digits=10, decimal_places=2)
+    price_per_unit = models.DecimalField(max_digits=10, decimal_places=2)
+    transaction_type = models.CharField(max_length=4, choices=TRANSACTION_TYPES)
+    transaction_date = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-transaction_date']
+```
+
+#### Crypto Transaction Model
+```python
+class CryptoTransaction(models.Model):
+    TRANSACTION_TYPES = [
+        ('BUY', 'Buy'),
+        ('SELL', 'Sell'),
+    ]
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    symbol = models.CharField(max_length=10)
+    units = models.DecimalField(max_digits=18, decimal_places=8)
+    price_per_unit = models.DecimalField(max_digits=10, decimal_places=2)
+    transaction_type = models.CharField(max_length=4, choices=TRANSACTION_TYPES)
+    transaction_date = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-transaction_date']
+```
+
+#### Price Alert Model
+```python
+class PriceAlert(models.Model):
+    ALERT_TYPES = [
+        ('ABOVE', 'Above'),
+        ('BELOW', 'Below'),
+    ]
+    
+    ASSET_TYPES = [
+        ('STOCK', 'Stock'),
+        ('CRYPTO', 'Cryptocurrency'),
+    ]
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    asset_type = models.CharField(max_length=6, choices=ASSET_TYPES)
+    ticker = models.CharField(max_length=10)
+    target_price = models.DecimalField(max_digits=10, decimal_places=2)
+    alert_type = models.CharField(max_length=5, choices=ALERT_TYPES)
+    is_triggered = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+```
+
+### Database Features
+
+- **ACID Compliance**: PostgreSQL ensures data integrity
+- **Indexing**: Optimized queries on frequently accessed fields
+- **Foreign Key Constraints**: Maintain referential integrity
+- **Automatic Timestamps**: Track creation and modification times
+- **Ordering**: Default ordering for better query performance
 
 ## 📁 Project Structure
 
 ```
-CPP-PROJECT/
+MSC-Cloud-SCP-PROJECT/
 ├── .github/
-│   └── workflows/              # CI/CD pipeline definitions
+│   └── workflows/              # GitHub Actions CI/CD
 │       ├── deploy.yml          # Deployment workflow
 │       └── test.yml            # Testing workflow
-├── backend/                    # Backend application
+├── backend/                    # Django backend application
 │   ├── api/                    # API endpoints
 │   │   ├── __init__.py
-│   │   ├── inventory.py        # Inventory endpoints
-│   │   └── reports.py          # Report endpoints
-│   ├── models/                 # Data models
+│   │   ├── views.py            # API view functions
+│   │   ├── serializers.py      # DRF serializers
+│   │   └── urls.py             # URL routing
+│   ├── models/                 # Database models
+│   │   ├── __init__.py
+│   │   ├── user.py             # User model
+│   │   ├── stock.py            # Stock transaction model
+│   │   ├── crypto.py           # Crypto transaction model
+│   │   └── alert.py            # Price alert model
 │   ├── services/               # Business logic
-│   └── requirements.txt        # Python dependencies
-├── frontend/                   # Frontend application
+│   │   ├── __init__.py
+│   │   ├── portfolio.py        # Portfolio calculations
+│   │   ├── api_integration.py  # Third-party API calls
+│   │   └── notifications.py    # Alert notification logic
+│   ├── utils/                  # Utility functions
+│   │   ├── __init__.py
+│   │   └── helpers.py
+│   ├── settings.py             # Django settings
+│   ├── urls.py                 # Main URL configuration
+│   └── wsgi.py                 # WSGI application
+├── frontend/                   # React frontend application
+│   ├── public/                 # Static files
+│   │   ├── index.html
+│   │   └── favicon.ico
 │   ├── src/
 │   │   ├── components/         # React components
-│   │   ├── services/           # API services
-│   │   └── utils/              # Utility functions
-│   ├── public/                 # Static assets
-│   └── package.json            # Node dependencies
-├── SNS/                        # SNS configuration
-│   ├── topics.json             # Topic definitions
-│   └── subscriptions.json      # Subscription configurations
-├── SQS/                        # SQS configuration
-│   ├── queues.json             # Queue definitions
-│   └── policies.json           # Access policies
-├── s3_manager/                 # S3 management utilities
-│   ├── __init__.py
-│   ├── bucket_manager.py       # Bucket operations
-│   └── lifecycle.py            # Lifecycle policies
-├── my_lamda_functions/         # Lambda function code
-│   ├── inventory_processor/    # Process inventory events
-│   ├── optimization_engine/    # Run optimizations
-│   ├── report_generator/       # Generate reports
-│   └── requirements.txt        # Lambda dependencies
-├── inventory_optimizer/        # Optimization algorithms
-│   ├── __init__.py
-│   ├── forecasting.py          # Demand forecasting
-│   ├── optimizer.py            # Optimization logic
-│   └── models.py               # ML models
+│   │   │   ├── Dashboard.js    # Main dashboard
+│   │   │   ├── StockManager.js # Stock management
+│   │   │   ├── CryptoManager.js# Crypto management
+│   │   │   ├── PriceAlerts.js  # Alert management
+│   │   │   ├── TaxCalculator.js# Tax calculator
+│   │   │   └── CurrencyConverter.js
+│   │   ├── services/           # API service layer
+│   │   │   ├── api.js          # API client configuration
+│   │   │   ├── auth.js         # Authentication service
+│   │   │   └── portfolio.js    # Portfolio API calls
+│   │   ├── utils/              # Utility functions
+│   │   ├── App.js              # Main app component
+│   │   └── index.js            # Entry point
+│   ├── package.json            # Node dependencies
+│   └── .env                    # Environment variables
+├── .env                        # Environment variables (root)
+├── Dockerfile                  # Docker container definition
+├── docker-compose.yml          # Multi-container orchestration
+├── requirements.txt            # Python dependencies
+├── manage.py                   # Django management script
 ├── .gitignore                  # Git ignore rules
-├── Dockerfile                  # Container configuration
-├── requirements.txt            # Project dependencies
-├── update_ip.py                # IP update utility
 └── README.md                   # This file
 ```
 
@@ -268,378 +707,709 @@ CPP-PROJECT/
 
 ### Prerequisites
 
-- **AWS Account**: Active AWS account with appropriate permissions
-- **AWS CLI**: Configured with credentials
-- **Python**: Version 3.8 or higher
-- **Node.js**: Version 14.x or higher
-- **Docker**: For local development and testing
-- **Git**: Version control
+#### Required Software
+- **Python**: 3.8 or higher
+- **Node.js**: 14.x or higher
+- **npm**: 6.x or higher
+- **Docker**: 20.x or higher (optional, but recommended)
+- **PostgreSQL**: 12+ (for local development)
+- **Git**: For version control
 
-### AWS Setup
+#### AWS Requirements
+- Active AWS account
+- AWS CLI configured with credentials
+- IAM permissions for:
+  - EC2 (launch instances, security groups)
+  - RDS (create database instances)
+  - Lambda (create functions)
+  - API Gateway (create APIs)
+  - CloudWatch (monitoring)
 
-1. **Configure AWS CLI**
-   ```bash
-   aws configure
-   # Enter your AWS Access Key ID
-   # Enter your AWS Secret Access Key
-   # Enter your default region (e.g., us-east-1)
-   ```
+### Installation
 
-2. **Create Required Resources**
-   ```bash
-   # Create S3 bucket
-   aws s3 mb s3://cpp-inventory-bucket-[unique-id]
-   
-   # Create SNS topic
-   aws sns create-topic --name inventory-notifications
-   
-   # Create SQS queue
-   aws sqs create-queue --queue-name inventory-events
-   ```
+#### 1. Clone Repository
+```bash
+git clone https://github.com/Ughanze23/MSC-Cloud-SCP-PROJECT.git
+cd MSC-Cloud-SCP-PROJECT
+```
 
-### Local Installation
+#### 2. Backend Setup
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/Ughanze23/CPP-PROJECT.git
-   cd CPP-PROJECT
-   ```
+```bash
+# Navigate to backend directory
+cd backend
 
-2. **Backend Setup**
-   ```bash
-   # Create virtual environment
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   
-   # Install dependencies
-   pip install -r requirements.txt
-   ```
+# Create virtual environment
+python -m venv venv
 
-3. **Frontend Setup**
-   ```bash
-   cd frontend
-   npm install
-   ```
+# Activate virtual environment
+# On macOS/Linux:
+source venv/bin/activate
+# On Windows:
+venv\Scripts\activate
 
-4. **Environment Configuration**
-   ```bash
-   # Create .env file
-   cp .env.example .env
-   
-   # Configure environment variables
-   # AWS_REGION=us-east-1
-   # SNS_TOPIC_ARN=arn:aws:sns:...
-   # SQS_QUEUE_URL=https://sqs...
-   # S3_BUCKET_NAME=cpp-inventory-bucket
-   ```
+# Install dependencies
+pip install -r requirements.txt
+
+# Set up environment variables
+cp .env.example .env
+# Edit .env with your configuration:
+# DATABASE_URL=postgresql://user:password@localhost:5432/portfolio_db
+# SECRET_KEY=your-secret-key-here
+# ALPHA_VANTAGE_API_KEY=your-api-key
+# COINMARKETCAP_API_KEY=your-api-key
+# TAX_API_URL=your-tax-api-url
+# CURRENCY_API_URL=your-currency-api-url
+# EMAIL_API_URL=your-email-api-url
+```
+
+#### 3. Database Setup
+
+**Using PostgreSQL locally:**
+```bash
+# Create database
+createdb portfolio_db
+
+# Run migrations
+python manage.py makemigrations
+python manage.py migrate
+
+# Create superuser
+python manage.py createsuperuser
+```
+
+**Using AWS RDS:**
+```bash
+# Update DATABASE_URL in .env with RDS endpoint
+# DATABASE_URL=postgresql://username:password@rds-endpoint:5432/dbname
+
+# Run migrations
+python manage.py migrate
+```
+
+#### 4. Frontend Setup
+
+```bash
+# Navigate to frontend directory
+cd frontend
+
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env
+# Edit .env with your configuration:
+# REACT_APP_API_URL=http://localhost:8000/api
+# REACT_APP_ALPHA_VANTAGE_KEY=your-api-key
+# REACT_APP_COINMARKETCAP_KEY=your-api-key
+```
 
 ### Running Locally
 
-#### Using Docker
+#### Option 1: Manual Execution
 
-```bash
-# Build the Docker image
-docker build -t cpp-project .
-
-# Run the container
-docker run -p 5000:5000 \
-  -e AWS_ACCESS_KEY_ID=your-key \
-  -e AWS_SECRET_ACCESS_KEY=your-secret \
-  cpp-project
-```
-
-#### Manual Execution
-
-**Backend API:**
+**Terminal 1 - Backend:**
 ```bash
 cd backend
-python app.py
-# Backend runs on http://localhost:5000
+source venv/bin/activate  # or venv\Scripts\activate on Windows
+python manage.py runserver
+# Backend runs on http://localhost:8000
 ```
 
-**Frontend:**
+**Terminal 2 - Frontend:**
 ```bash
 cd frontend
 npm start
 # Frontend runs on http://localhost:3000
 ```
 
+**Access the application:**
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000
+- Django Admin: http://localhost:8000/admin
+
+#### Option 2: Using Docker (Recommended)
+
+```bash
+# Build and run containers
+docker-compose up --build
+
+# Run in detached mode
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop containers
+docker-compose down
+```
+
+**Docker Configuration** (`docker-compose.yml`):
+```yaml
+version: '3.8'
+
+services:
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: portfolio_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/portfolio_db
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000/api
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+```
+
+### Testing
+
+```bash
+# Backend tests
+cd backend
+python manage.py test
+
+# Frontend tests
+cd frontend
+npm test
+
+# Run with coverage
+python manage.py test --with-coverage
+npm test -- --coverage
+```
+
 ## 📦 Deployment
 
-### Lambda Deployment
+### AWS Deployment Architecture
 
-1. **Package Lambda Functions**
-   ```bash
-   cd my_lamda_functions
-   zip -r ../my_lamda_functions.zip .
-   ```
+The application is deployed on AWS with the following components:
 
-2. **Deploy to AWS**
-   ```bash
-   aws lambda update-function-code \
-     --function-name inventory-processor \
-     --zip-file fileb://my_lamda_functions.zip
-   ```
+```
+Internet
+   │
+   ▼
+┌──────────────────┐
+│  Load Balancer   │ (Optional - for high availability)
+└────────┬─────────┘
+         │
+         ▼
+┌──────────────────┐
+│   EC2 Instance   │
+│  ┌────────────┐  │
+│  │   Docker   │  │
+│  │ Container  │  │
+│  │ React+     │  │
+│  │ Django     │  │
+│  └────────────┘  │
+└────────┬─────────┘
+         │
+         ├──────────────┐
+         │              │
+         ▼              ▼
+┌──────────────┐  ┌──────────────┐
+│     RDS      │  │ API Gateway  │
+│ PostgreSQL   │  │      +       │
+└──────────────┘  │   Lambda     │
+                  │  (Tax API)   │
+                  └──────────────┘
+```
 
-### Infrastructure as Code
+### Deployment Steps
 
-**Using AWS CDK:**
+#### 1. Prepare AWS Resources
+
+**Create RDS Database:**
 ```bash
-cd infrastructure
-cdk deploy
+aws rds create-db-instance \
+    --db-instance-identifier portfolio-db \
+    --db-instance-class db.t3.micro \
+    --engine postgres \
+    --master-username admin \
+    --master-user-password your-password \
+    --allocated-storage 20
 ```
 
-**Using Terraform:**
+**Create EC2 Instance:**
 ```bash
-cd terraform
-terraform init
-terraform plan
-terraform apply
+aws ec2 run-instances \
+    --image-id ami-xxxxxxxxx \
+    --instance-type t3.micro \
+    --key-name your-key-pair \
+    --security-groups portfolio-sg
 ```
 
-### CI/CD Deployment
+#### 2. Build and Push Docker Image
 
-The GitHub Actions workflow automatically deploys to AWS:
+```bash
+# Build Docker image
+docker build -t portfolio-app:latest .
 
-1. Push to `main` branch triggers deployment
-2. Runs tests and security scans
-3. Builds and packages Lambda functions
-4. Deploys to AWS using configured credentials
-5. Runs smoke tests to verify deployment
+# Tag for ECR (if using AWS ECR)
+docker tag portfolio-app:latest \
+    your-account-id.dkr.ecr.region.amazonaws.com/portfolio-app:latest
 
-## 📖 API Documentation
-
-### Inventory Endpoints
-
-#### Get All Inventory Items
-```http
-GET /api/inventory
+# Push to ECR
+docker push your-account-id.dkr.ecr.region.amazonaws.com/portfolio-app:latest
 ```
 
-**Response:**
-```json
-{
-  "items": [
-    {
-      "id": "inv-001",
-      "product": "Widget A",
-      "quantity": 150,
-      "location": "Warehouse-1",
-      "lastUpdated": "2024-01-15T10:30:00Z"
-    }
-  ]
-}
+#### 3. Deploy to EC2
+
+```bash
+# SSH into EC2 instance
+ssh -i your-key.pem ec2-user@your-ec2-ip
+
+# Pull Docker image
+docker pull your-account-id.dkr.ecr.region.amazonaws.com/portfolio-app:latest
+
+# Run container
+docker run -d \
+    -p 80:3000 \
+    -e DATABASE_URL=your-rds-endpoint \
+    -e SECRET_KEY=your-secret \
+    --name portfolio-app \
+    your-account-id.dkr.ecr.region.amazonaws.com/portfolio-app:latest
 ```
 
-#### Update Inventory
-```http
-POST /api/inventory/update
+#### 4. Deploy Lambda Function (Tax API)
+
+```bash
+# Package Lambda function
+cd lambda/tax-calculator
+zip -r function.zip .
+
+# Deploy to AWS Lambda
+aws lambda create-function \
+    --function-name tax-calculator \
+    --runtime python3.8 \
+    --role arn:aws:iam::account-id:role/lambda-role \
+    --handler lambda_function.lambda_handler \
+    --zip-file fileb://function.zip
 ```
 
-**Request Body:**
-```json
-{
-  "productId": "inv-001",
-  "quantity": 200,
-  "location": "Warehouse-1"
-}
+#### 5. Configure API Gateway
+
+```bash
+# Create API
+aws apigateway create-rest-api --name portfolio-api
+
+# Create resource and method
+# Configure Lambda integration
+# Deploy to stage
 ```
 
-#### Trigger Optimization
-```http
-POST /api/optimize
+### Environment Variables
+
+**Production `.env` file:**
+```bash
+# Django Settings
+SECRET_KEY=your-production-secret-key
+DEBUG=False
+ALLOWED_HOSTS=your-domain.com,www.your-domain.com
+
+# Database
+DATABASE_URL=postgresql://username:password@rds-endpoint:5432/dbname
+
+# API Keys
+ALPHA_VANTAGE_API_KEY=your-production-key
+COINMARKETCAP_API_KEY=your-production-key
+
+# Custom APIs
+TAX_API_URL=https://api-gateway-url/prod/tax
+CURRENCY_API_URL=https://currency-api-url
+EMAIL_API_URL=https://email-api-url
+EMAIL_API_TOKEN=your-bearer-token
+
+# CORS
+CORS_ALLOWED_ORIGINS=https://your-domain.com
 ```
 
-**Request Body:**
-```json
-{
-  "locations": ["Warehouse-1", "Warehouse-2"],
-  "parameters": {
-    "forecastDays": 30,
-    "safetyStock": 0.2
-  }
-}
+## 🔄 CI/CD Pipeline
+
+### GitHub Actions Workflow
+
+The project implements automated CI/CD using GitHub Actions:
+
+```yaml
+name: Deploy to AWS EC2
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      
+      - name: Install dependencies
+        run: |
+          pip install flake8 pylint
+          pip install -r backend/requirements.txt
+      
+      - name: Lint with flake8
+        run: |
+          flake8 backend/ --count --select=E9,F63,F7,F82 --show-source --statistics
+      
+      - name: Lint with pylint
+        run: |
+          pylint backend/ --fail-under=7.0
+
+  test:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      
+      - name: Install dependencies
+        run: |
+          pip install -r backend/requirements.txt
+      
+      - name: Run tests
+        run: |
+          cd backend
+          python manage.py test
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      
+      - name: Build Docker image
+        run: |
+          docker build -t portfolio-app:${{ github.sha }} .
+      
+      - name: Save Docker image
+        run: |
+          docker save portfolio-app:${{ github.sha }} -o portfolio-app.tar
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: docker-image
+          path: portfolio-app.tar
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: docker-image
+      
+      - name: Load Docker image
+        run: docker load -i portfolio-app.tar
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+      
+      - name: Tag and push to ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: portfolio-app
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker tag portfolio-app:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker tag portfolio-app:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+      
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            docker pull ${{ steps.login-ecr.outputs.registry }}/portfolio-app:latest
+            docker stop portfolio-app || true
+            docker rm portfolio-app || true
+            docker run -d \
+              -p 80:3000 \
+              --name portfolio-app \
+              --env-file /home/ec2-user/.env \
+              ${{ steps.login-ecr.outputs.registry }}/portfolio-app:latest
+      
+      - name: Health check
+        run: |
+          sleep 30
+          curl -f http://${{ secrets.EC2_HOST }}/health || exit 1
 ```
 
-### Report Endpoints
+### Pipeline Stages
 
-#### Generate Report
-```http
-POST /api/reports/generate
+1. **Lint**: Code quality checks with flake8 and pylint
+2. **Test**: Run unit and integration tests
+3. **Build**: Create Docker image and save as artifact
+4. **Deploy**: Push to ECR and deploy to EC2 instance
+5. **Health Check**: Verify deployment success
+
+### Required GitHub Secrets
+
+Configure these secrets in your GitHub repository settings:
+
+```
+AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY
+EC2_HOST
+EC2_SSH_KEY
+DOCKER_REGISTRY (optional)
 ```
 
-#### Download Report
-```http
-GET /api/reports/{reportId}
-```
+## 📸 Screenshots
 
-## 🔄 Event-Driven Workflow
+### Dashboard
+![Portfolio Dashboard showing total portfolio value of €792,000.00 and 3 cryptocurrency holdings](screenshots/dashboard.png)
 
-### Typical Event Flow
+*Main dashboard displaying portfolio overview with total value and asset summary*
 
-1. **Inventory Update**
-   - User updates inventory via frontend/API
-   - Event published to SNS topic
-   - SNS forwards to SQS queue
+### Price Alerts
+![Price alert email notification interface](screenshots/price-alert.png)
 
-2. **Event Processing**
-   - Lambda function triggered by SQS message
-   - Processes inventory update
-   - Updates database/storage
-   - Sends confirmation
+*Email notification triggered when price alert conditions are met*
 
-3. **Optimization Trigger**
-   - Scheduled CloudWatch event
-   - Lambda runs optimization algorithm
-   - Generates recommendations
-   - Stores results in S3
+### Financial News
+![Financial news feed showing market updates](screenshots/financial-news.png)
 
-4. **Notification**
-   - Critical thresholds detected
-   - SNS sends notifications
-   - Email/SMS to stakeholders
-   - Dashboard updated
+*Real-time financial news integration via Alpha Vantage API*
 
-### Message Format
+### Database Models
+![Django database models showing relationships](screenshots/database-models.png)
 
-**SNS Message:**
-```json
-{
-  "eventType": "inventory.updated",
-  "timestamp": "2024-01-15T10:30:00Z",
-  "data": {
-    "productId": "inv-001",
-    "quantity": 150,
-    "location": "Warehouse-1"
-  }
-}
-```
+*Database schema showing User, StockTransaction, CryptoTransaction, and PriceAlert models*
 
-## 📊 Monitoring & Logging
+## 🔮 Future Enhancements
 
-### CloudWatch Metrics
+### Planned Features
 
-- **Lambda Metrics**: Invocations, errors, duration, concurrent executions
-- **SQS Metrics**: Messages sent, received, deleted, queue depth
-- **API Metrics**: Request count, latency, error rate
-- **Custom Metrics**: Business KPIs, optimization performance
+1. **Advanced Analytics**
+   - Historical performance charts
+   - ROI calculations
+   - Portfolio diversification analysis
+   - Risk assessment metrics
 
-### CloudWatch Logs
+2. **Real-Time Price Notifications**
+   - WebSocket integration for instant updates
+   - Push notifications for mobile
+   - Customizable notification channels
 
-- **Application Logs**: Structured logging with JSON format
-- **Lambda Logs**: Automatic log groups per function
-- **API Gateway Logs**: Request/response logging
-- **VPC Flow Logs**: Network traffic analysis (if applicable)
+3. **Enhanced Tax Features**
+   - Multi-jurisdiction tax calculations
+   - Automated tax report generation
+   - Export to tax software formats
 
-### Alarms
+4. **Social Features**
+   - Share portfolio performance (anonymously)
+   - Community investment insights
+   - Follow successful investors
 
-- High error rate on Lambda functions
-- SQS queue depth exceeding threshold
-- API latency above acceptable limits
-- Cost anomalies detected
+5. **Mobile Application**
+   - Native iOS and Android apps
+   - Offline mode with sync
+   - Biometric authentication
 
-### Dashboards
+6. **Advanced Trading Features**
+   - Paper trading / simulation mode
+   - Trading strategy backtesting
+   - Automated trading rules
 
-Custom CloudWatch dashboards for:
-- Real-time system health
-- Business metrics and KPIs
-- Cost and usage tracking
-- Performance trends
+### Technical Improvements
 
-## 💰 Cost Optimization
+1. **Microservices Decoupling**
+   - Deploy React and Django separately
+   - Independent scaling
+   - Better fault isolation
 
-### Strategies Implemented
+2. **Caching Layer**
+   - Redis for API response caching
+   - Reduce third-party API calls
+   - Improve response times
 
-1. **Serverless Architecture**: Pay only for actual usage
-2. **S3 Lifecycle Policies**: Automatic transition to cheaper storage tiers
-3. **Lambda Optimization**: Efficient memory allocation and execution time
-4. **SQS Batching**: Process messages in batches to reduce invocations
-5. **Reserved Capacity**: For predictable workloads (if applicable)
+3. **Enhanced Security**
+   - Multi-factor authentication (MFA)
+   - API rate limiting
+   - Advanced threat detection
 
-### Cost Monitoring
-
-- **AWS Cost Explorer**: Track spending by service
-- **Budgets**: Set alerts for cost thresholds
-- **Cost Allocation Tags**: Track costs by project/environment
-
-### Estimated Monthly Costs
-
-| Service | Usage | Estimated Cost |
-|---------|-------|----------------|
-| Lambda | 1M invocations | $0.20 |
-| SQS | 1M requests | $0.40 |
-| SNS | 100K notifications | $0.50 |
-| S3 | 100GB storage | $2.30 |
-| CloudWatch | Standard metrics | $3.00 |
-| **Total** | | **~$6.40** |
-
-*Costs are estimates based on AWS free tier and typical usage patterns*
+4. **Performance Optimization**
+   - CDN for static assets
+   - Database query optimization
+   - Lazy loading for UI components
 
 ## 📚 Documentation
 
-Comprehensive documentation is available:
+### Available Resources
 
-- **[Project Report](https://drive.google.com/file/d/14_afWEFO1cCxO7o11jGpk5X13k4yfsXP/view?usp=drive_link)**: Detailed academic report
-- **API Documentation**: Interactive Swagger/OpenAPI docs at `/api/docs`
-- **Architecture Diagrams**: AWS architecture diagrams
-- **Lambda Functions**: Individual README in each function directory
-- **Deployment Guide**: Step-by-step deployment instructions
-- **Troubleshooting**: Common issues and solutions
+- **[Project Report](https://drive.google.com/file/d/1otEltqxjy81nIsm3MHuob09_DdSgd7VT/view?usp=drive_link)**: Complete academic documentation (Word Count: 1822)
+- **[Tax API Documentation](https://github.com/Ughanze23/tax-calculation-api)**: Custom tax calculation API
+- **[Live Application](http://ec2-deployment-url)**: Deployed application on AWS EC2
+- **API Documentation**: Available at `/api/docs` endpoint
+- **Architecture Diagrams**: Included in project report
+
+### Key Documentation Sections
+
+1. **Introduction**: Problem statement and objectives
+2. **Requirements**: Functional and non-functional specifications
+3. **Design & Architecture**: Cloud architecture and design patterns
+4. **Implementation**: Technology choices and integration details
+5. **CI/CD**: Deployment pipeline and automation
+6. **Conclusion**: Findings, challenges, and learnings
+
+### References
+
+1. M. P. Arunachalam and S. Manager, "A COMPREHENSIVE APPROACH TO FINANCIAL PORTFOLIO MANAGEMENT WITH CLOUD INFRASTRUCTURE"
+2. "Why Cloud Computing is Crucial for Modern Finance" - The Schlott Company
+3. S. Li et al., "Understanding and addressing quality attributes of microservices architecture"
+4. Sam Newman, "Building Microservices"
+5. AWS RDS Documentation
+6. Alpha Vantage API Documentation
+7. CoinMarketCap API Documentation
+
+## 🎓 Academic Context
+
+### Course Information
+- **Module**: Scalable Cloud Programming
+- **Programme**: MSc in Cloud Computing
+- **Institution**: National College of Ireland
+- **Academic Year**: 2024/2025
+- **Lecturer**: Vikas Sahni
+- **Submission Date**: 02/04/2024
+
+### AI Usage Acknowledgment
+
+This project used Claude.ai (LLM) for:
+- File import assistance
+- API integration implementation
+- Code troubleshooting and debugging
+
+All AI usage has been properly documented in accordance with academic integrity policies. See AI Acknowledgement Supplement in project report for detailed usage.
+
+### Evaluation Criteria
+
+The project is evaluated on:
+- ✅ Implementation of microservices architecture
+- ✅ Integration with multiple third-party services
+- ✅ Cloud deployment and scalability
+- ✅ Security and data integrity
+- ✅ Code quality and documentation
+- ✅ CI/CD pipeline implementation
+- ✅ User experience and interface design
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please follow these guidelines:
+While this is an academic project, feedback and suggestions are welcome:
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Follow coding standards (PEP 8 for Python, ESLint for JavaScript)
-4. Write tests for new features
-5. Update documentation
-6. Commit changes (`git commit -m 'Add AmazingFeature'`)
-7. Push to branch (`git push origin feature/AmazingFeature`)
-8. Open a Pull Request
-
-### Development Guidelines
-
-- Write clean, maintainable code
-- Add comprehensive tests (aim for >80% coverage)
-- Document all public APIs
-- Follow Git commit message conventions
-- Update CHANGELOG.md
+1. **Report Issues**: Use GitHub Issues for bug reports
+2. **Suggest Features**: Open a discussion for feature requests
+3. **Code Review**: Provide constructive feedback on code quality
+4. **Documentation**: Help improve documentation clarity
 
 ## 📄 License
 
-This project is part of academic coursework for the MSc in Cloud Computing program.
+This project is submitted as part of academic coursework for the MSc in Cloud Computing program at National College of Ireland. All rights reserved by the author for academic purposes.
 
 ## 👨‍💻 Author
 
-**Polycarp Ughanze**
-- GitHub: [@Ughanze23](https://github.com/Ughanze23)
-- Institution: National College of Ireland
-- Program: MSc in Cloud Computing
+**Ikenna Ughanze Polycarp**
+- **Student ID**: 23384069
+- **Email**: x23384069@student.ncirl.ie
+- **GitHub**: [@Ughanze23](https://github.com/Ughanze23)
+- **Institution**: National College of Ireland
+- **Programme**: MSc in Cloud Computing
 
 ## 🙏 Acknowledgments
 
-- National College of Ireland for academic guidance
-- AWS for educational credits and comprehensive documentation
-- Open-source community for excellent libraries and tools
-- Course instructors for valuable feedback and support
+- **Vikas Sahni**: Course lecturer for guidance and feedback
+- **Classmates**: 
+  - x23158131 for Currency Converter API
+  - x23122498 for Email Notification API
+- **National College of Ireland**: For providing educational resources
+- **AWS**: For educational credits and comprehensive documentation
+- **Alpha Vantage & CoinMarketCap**: For providing free-tier API access
+- **Open-Source Community**: For excellent tools and libraries
 
 ## 📞 Support
 
 For questions or issues:
-- **GitHub Issues**: Report bugs or request features
-- **Documentation**: Refer to comprehensive docs
-- **AWS Support**: For AWS-specific questions
+- **GitHub Issues**: [Report bugs or request features](https://github.com/Ughanze23/MSC-Cloud-SCP-PROJECT/issues)
+- **Email**: x23384069@student.ncirl.ie
+- **Documentation**: Refer to project report and inline documentation
 
 ---
 
-**Note**: This project demonstrates enterprise-level cloud architecture and serverless patterns. It is optimized for scalability, cost-efficiency, and operational excellence, showcasing best practices in AWS cloud engineering.
-
-**Key Highlights**:
-- ✅ Event-driven serverless architecture
-- ✅ Real-time inventory optimization
-- ✅ Fully automated CI/CD pipeline
-- ✅ Comprehensive monitoring and logging
-- ✅ Cost-optimized infrastructure
+**Project Highlights:**
+- ✅ Microservices architecture with 5+ API integrations
+- ✅ Full-stack React + Django application
+- ✅ AWS deployment (EC2, RDS, Lambda, API Gateway)
+- ✅ Custom tax calculation API
+- ✅ Real-time price alerts via email
+- ✅ Multi-currency portfolio valuation
+- ✅ Automated CI/CD pipeline with GitHub Actions
+- ✅ Comprehensive documentation and testing
+- ✅ >99% uptime target with auto-scaling
 - ✅ Production-ready code quality
+
+**Technologies:**
+- Frontend: React.js (71.2%)
+- Backend: Python/Django (25.1%)
+- Database: PostgreSQL on AWS RDS
+- Cloud: AWS (EC2, Lambda, API Gateway, RDS)
+- DevOps: Docker, GitHub Actions
+- APIs: Alpha Vantage, CoinMarketCap, Custom APIs
+
+This project demonstrates enterprise-level cloud engineering practices suitable for production financial applications, showcasing expertise in full-stack development, microservices architecture, and cloud-native deployment.
